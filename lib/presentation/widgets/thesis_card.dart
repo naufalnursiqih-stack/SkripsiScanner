@@ -40,16 +40,41 @@ class ThesisCard extends StatelessWidget {
               _buildImage(),
               const SizedBox(height: 12),
             ],
-            _buildField(context, Icons.menu_book_rounded, 'Judul', thesis.title),
+            _buildField(
+              context,
+              Icons.menu_book_rounded,
+              'Judul',
+              thesis.title,
+            ),
             _buildField(context, Icons.person_rounded, 'Nama', thesis.name),
             _buildField(context, Icons.badge_rounded, 'NIM', thesis.nim),
-            _buildField(context, Icons.school_rounded, 'Program Studi', thesis.major),
+            _buildField(
+              context,
+              Icons.school_rounded,
+              'Program Studi',
+              thesis.major,
+            ),
             if (thesis.faculty.isNotEmpty)
-              _buildField(context, Icons.account_balance_rounded, 'Fakultas', thesis.faculty),
+              _buildField(
+                context,
+                Icons.account_balance_rounded,
+                'Fakultas',
+                thesis.faculty,
+              ),
             if (thesis.university.isNotEmpty)
-              _buildField(context, Icons.location_city_rounded, 'Universitas', thesis.university),
+              _buildField(
+                context,
+                Icons.location_city_rounded,
+                'Universitas',
+                thesis.university,
+              ),
             if (thesis.year.isNotEmpty)
-              _buildField(context, Icons.calendar_today_rounded, 'Tahun', thesis.year),
+              _buildField(
+                context,
+                Icons.calendar_today_rounded,
+                'Tahun',
+                thesis.year,
+              ),
           ],
         ),
       ),
@@ -121,13 +146,23 @@ class ThesisCard extends StatelessWidget {
 
     return Container(
       padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-      decoration: BoxDecoration(color: bg, borderRadius: BorderRadius.circular(20)),
+      decoration: BoxDecoration(
+        color: bg,
+        borderRadius: BorderRadius.circular(20),
+      ),
       child: Row(
         mainAxisSize: MainAxisSize.min,
         children: [
           Icon(icon, color: fg, size: 14),
           const SizedBox(width: 4),
-          Text(label, style: TextStyle(color: fg, fontSize: 12, fontWeight: FontWeight.w600)),
+          Text(
+            label,
+            style: TextStyle(
+              color: fg,
+              fontSize: 12,
+              fontWeight: FontWeight.w600,
+            ),
+          ),
         ],
       ),
     );
@@ -141,18 +176,27 @@ class ThesisCard extends StatelessWidget {
         height: 140,
         width: double.infinity,
         fit: BoxFit.cover,
-        errorBuilder: (_, __, ___) => Container(
+        errorBuilder: (_, _, _) => Container(
           height: 140,
           color: Colors.grey.shade100,
           child: const Center(
-            child: Icon(Icons.broken_image_rounded, color: Colors.grey, size: 40),
+            child: Icon(
+              Icons.broken_image_rounded,
+              color: Colors.grey,
+              size: 40,
+            ),
           ),
         ),
       ),
     );
   }
 
-  Widget _buildField(BuildContext context, IconData icon, String label, String value) {
+  Widget _buildField(
+    BuildContext context,
+    IconData icon,
+    String label,
+    String value,
+  ) {
     if (value.isEmpty) return const SizedBox.shrink();
 
     return Padding(
@@ -177,7 +221,10 @@ class ThesisCard extends StatelessWidget {
                 const SizedBox(height: 1),
                 Text(
                   value,
-                  style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w500),
+                  style: const TextStyle(
+                    fontSize: 13,
+                    fontWeight: FontWeight.w500,
+                  ),
                 ),
               ],
             ),

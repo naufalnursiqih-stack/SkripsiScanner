@@ -43,7 +43,7 @@ class _ScannerPageState extends State<ScannerPage> {
     try {
       final assets = await AssetPicker.pickAssets(
         context,
-        pickerConfig: const AssetPickerConfig(
+        pickerConfig: AssetPickerConfig(
           maxAssets: AppConstants.maxBatchSize,
           requestType: RequestType.image,
           gridCount: 3,

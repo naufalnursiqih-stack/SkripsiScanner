@@ -60,7 +60,8 @@ class _ReviewPageState extends State<ReviewPage>
                   ],
                 ),
               ),
-              if (provider.successItems.isNotEmpty) _buildSendBar(context, provider),
+              if (provider.successItems.isNotEmpty)
+                _buildSendBar(context, provider),
             ],
           );
         },
@@ -80,7 +81,10 @@ class _ReviewPageState extends State<ReviewPage>
             children: [
               Text(
                 'Memproses ${provider.processedCount}/${provider.totalCount}…',
-                style: const TextStyle(fontSize: 13, fontWeight: FontWeight.w600),
+                style: const TextStyle(
+                  fontSize: 13,
+                  fontWeight: FontWeight.w600,
+                ),
               ),
               Text(
                 '${(provider.progress * 100).toStringAsFixed(0)}%',
@@ -101,7 +105,10 @@ class _ReviewPageState extends State<ReviewPage>
   }
 
   Widget _buildList(
-      BuildContext context, List<ThesisModel> items, ScanProvider provider) {
+    BuildContext context,
+    List<ThesisModel> items,
+    ScanProvider provider,
+  ) {
     if (items.isEmpty) {
       return const Center(
         child: Column(
@@ -118,7 +125,7 @@ class _ReviewPageState extends State<ReviewPage>
     return ListView.separated(
       padding: const EdgeInsets.all(16),
       itemCount: items.length,
-      separatorBuilder: (_, __) => const SizedBox(height: 12),
+      separatorBuilder: (_, _) => const SizedBox(height: 12),
       itemBuilder: (context, index) {
         final thesis = items[index];
         return ThesisCard(
@@ -164,14 +171,19 @@ class _ReviewPageState extends State<ReviewPage>
                       ),
                       child: Row(
                         children: [
-                          const Icon(Icons.error_outline_rounded,
-                              color: Colors.red, size: 16),
+                          const Icon(
+                            Icons.error_outline_rounded,
+                            color: Colors.red,
+                            size: 16,
+                          ),
                           const SizedBox(width: 8),
                           Expanded(
                             child: Text(
                               provider.errorMessage!,
                               style: const TextStyle(
-                                  color: Colors.red, fontSize: 13),
+                                color: Colors.red,
+                                fontSize: 13,
+                              ),
                             ),
                           ),
                         ],
@@ -203,14 +215,19 @@ class _ReviewPageState extends State<ReviewPage>
       ),
       child: Row(
         children: [
-          const Icon(Icons.check_circle_rounded,
-              color: Color(0xFF0E9F6E), size: 28),
+          const Icon(
+            Icons.check_circle_rounded,
+            color: Color(0xFF0E9F6E),
+            size: 28,
+          ),
           const SizedBox(width: 12),
           const Expanded(
             child: Text(
               'Data berhasil dikirim ke Google Sheets!',
               style: TextStyle(
-                  fontWeight: FontWeight.w600, color: Color(0xFF0E9F6E)),
+                fontWeight: FontWeight.w600,
+                color: Color(0xFF0E9F6E),
+              ),
             ),
           ),
           TextButton(
@@ -225,7 +242,10 @@ class _ReviewPageState extends State<ReviewPage>
   // ─── Dialogs ────────────────────────────────────────────────────────────────
 
   void _showEditDialog(
-      BuildContext context, ThesisModel thesis, ScanProvider provider) {
+    BuildContext context,
+    ThesisModel thesis,
+    ScanProvider provider,
+  ) {
     final titleCtrl = TextEditingController(text: thesis.title);
     final nameCtrl = TextEditingController(text: thesis.name);
     final nimCtrl = TextEditingController(text: thesis.nim);
@@ -260,7 +280,9 @@ class _ReviewPageState extends State<ReviewPage>
                       const Text(
                         'Edit Data',
                         style: TextStyle(
-                            fontSize: 18, fontWeight: FontWeight.w700),
+                          fontSize: 18,
+                          fontWeight: FontWeight.w700,
+                        ),
                       ),
                       const Spacer(),
                       IconButton(
@@ -276,21 +298,24 @@ class _ReviewPageState extends State<ReviewPage>
                       child: Column(
                         children: [
                           _EditField(
-                              label: 'Judul Skripsi',
-                              controller: titleCtrl,
-                              maxLines: 3),
+                            label: 'Judul Skripsi',
+                            controller: titleCtrl,
+                            maxLines: 3,
+                          ),
                           _EditField(
-                              label: 'Nama Penulis',
-                              controller: nameCtrl),
+                            label: 'Nama Penulis',
+                            controller: nameCtrl,
+                          ),
                           _EditField(label: 'NIM', controller: nimCtrl),
                           _EditField(
-                              label: 'Program Studi',
-                              controller: majorCtrl),
+                            label: 'Program Studi',
+                            controller: majorCtrl,
+                          ),
                           _EditField(
-                              label: 'Fakultas',
-                              controller: facultyCtrl),
-                          _EditField(
-                              label: 'Tahun', controller: yearCtrl),
+                            label: 'Fakultas',
+                            controller: facultyCtrl,
+                          ),
+                          _EditField(label: 'Tahun', controller: yearCtrl),
                         ],
                       ),
                     ),
@@ -300,14 +325,16 @@ class _ReviewPageState extends State<ReviewPage>
                     label: 'Simpan Perubahan',
                     icon: Icons.save_rounded,
                     onPressed: () {
-                      provider.updateItem(thesis.copyWith(
-                        title: titleCtrl.text.trim(),
-                        name: nameCtrl.text.trim(),
-                        nim: nimCtrl.text.trim(),
-                        major: majorCtrl.text.trim(),
-                        faculty: facultyCtrl.text.trim(),
-                        year: yearCtrl.text.trim(),
-                      ));
+                      provider.updateItem(
+                        thesis.copyWith(
+                          title: titleCtrl.text.trim(),
+                          name: nameCtrl.text.trim(),
+                          nim: nimCtrl.text.trim(),
+                          major: majorCtrl.text.trim(),
+                          faculty: facultyCtrl.text.trim(),
+                          year: yearCtrl.text.trim(),
+                        ),
+                      );
                       Navigator.pop(ctx);
                     },
                   ),
@@ -320,8 +347,7 @@ class _ReviewPageState extends State<ReviewPage>
     );
   }
 
-  void _confirmDelete(
-      BuildContext context, String id, ScanProvider provider) {
+  void _confirmDelete(BuildContext context, String id, ScanProvider provider) {
     showDialog(
       context: context,
       builder: (ctx) => AlertDialog(
@@ -329,15 +355,15 @@ class _ReviewPageState extends State<ReviewPage>
         content: const Text('Data scan ini akan dihapus dari daftar.'),
         actions: [
           TextButton(
-              onPressed: () => Navigator.pop(ctx),
-              child: const Text('Batal')),
+            onPressed: () => Navigator.pop(ctx),
+            child: const Text('Batal'),
+          ),
           TextButton(
             onPressed: () {
               provider.removeItem(id);
               Navigator.pop(ctx);
             },
-            child:
-                const Text('Hapus', style: TextStyle(color: Colors.red)),
+            child: const Text('Hapus', style: TextStyle(color: Colors.red)),
           ),
         ],
       ),
@@ -345,7 +371,9 @@ class _ReviewPageState extends State<ReviewPage>
   }
 
   Future<void> _sendToSheets(
-      BuildContext context, ScanProvider provider) async {
+    BuildContext context,
+    ScanProvider provider,
+  ) async {
     final success = await provider.sendToSheets();
     if (!success && mounted) {
       ScaffoldMessenger.of(context).showSnackBar(

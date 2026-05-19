@@ -14,12 +14,12 @@ class RegexHelper {
   // ─── Name ───────────────────────────────────────────────────────────────────
   // Indonesian thesis convention: name appears after "Oleh", "Disusun Oleh", etc.
   static final _namePrefixed = RegExp(
-    r'(?:Disusun\s+Oleh|Oleh\s*:?)\s*\n?\s*([A-Z][a-zA-Z .\']{3,60})',
+    r"(?:Disusun\s+Oleh|Oleh\s*:?)\s*\n?\s*([A-Z][a-zA-Z .']{3,60})",
     caseSensitive: false,
   );
   // Name line that appears just ABOVE or BELOW a NIM line (heuristic fallback)
   static final _nameNearNim = RegExp(
-    r'([A-Z][a-zA-Z .\']{3,60})\s*\n\s*(?:NIM|NPM|NRP)[^\d]*\d{10,12}',
+    r"([A-Z][a-zA-Z .']{3,60})\s*\n\s*(?:NIM|NPM|NRP)[^\d]*\d{10,12}",
     caseSensitive: false,
   );
 

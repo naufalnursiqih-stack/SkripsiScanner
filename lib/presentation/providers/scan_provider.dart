@@ -1,6 +1,5 @@
 // lib/presentation/providers/scan_provider.dart
 
-import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:uuid/uuid.dart';
 import '../../data/models/thesis_model.dart';
@@ -38,8 +37,7 @@ class ScanProvider extends ChangeNotifier {
   bool get isProcessing =>
       _state == ProviderState.scanning || _state == ProviderState.sending;
 
-  double get progress =>
-      _totalCount == 0 ? 0 : _processedCount / _totalCount;
+  double get progress => _totalCount == 0 ? 0 : _processedCount / _totalCount;
 
   // ─── Scanning ────────────────────────────────────────────────────────────────
 
@@ -55,12 +53,14 @@ class ScanProvider extends ChangeNotifier {
 
     // Create pending models
     final newModels = imagePaths
-        .map((path) => ThesisModel(
-              id: _uuid.v4(),
-              imagePath: path,
-              status: ScanStatus.pending,
-              scannedAt: DateTime.now(),
-            ))
+        .map(
+          (path) => ThesisModel(
+            id: _uuid.v4(),
+            imagePath: path,
+            status: ScanStatus.pending,
+            scannedAt: DateTime.now(),
+          ),
+        )
         .toList();
 
     _items.addAll(newModels);
