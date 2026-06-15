@@ -1,6 +1,7 @@
 // lib/presentation/pages/scanner_page.dart
 
 import 'dart:io';
+import 'package:camera/camera.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:image_picker/image_picker.dart';
@@ -20,16 +21,21 @@ class ScannerPage extends StatefulWidget {
 }
 
 class _ScannerPageState extends State<ScannerPage>
-    with SingleTickerProviderStateMixin {
+    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
   final _picker = ImagePicker();
   final List<String> _selectedPaths = [];
   bool _isPicking = false;
   bool _isMultiPage = false; // Mode single atau multi halaman
   late AnimationController _scanController;
 
+  CameraController? _cameraController;
+  bool _isCameraInitialized = false;
+  bool _isCameraInitializing = false;
+
   @override
   void initState() {
     super.initState();
+    WidgetsBinding.instance.addObserver(this);
     _isMultiPage = !widget.fromCamera; // Pilih mode multi-page otomatis jika dari galeri
 
     _scanController = AnimationController(
@@ -37,33 +43,97 @@ class _ScannerPageState extends State<ScannerPage>
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    // Jalankan aksi otomatis pertama kali halaman dibuka
+    _initializeCamera();
+
+    // Jalankan aksi otomatis pertama kali halaman dibuka jika dari galeri
     WidgetsBinding.instance.addPostFrameCallback((_) {
-      if (widget.fromCamera) {
-        _captureImage();
-      } else {
+      if (!widget.fromCamera) {
         _importFromGallery();
       }
     });
   }
 
+  Future<void> _initializeCamera() async {
+    if (_isCameraInitializing) return;
+    setState(() {
+      _isCameraInitializing = true;
+    });
+
+    try {
+      final cameras = await availableCameras();
+      if (cameras.isEmpty) {
+        debugPrint('No cameras found.');
+        setState(() {
+          _isCameraInitializing = false;
+        });
+        return;
+      }
+
+      // Cari kamera belakang
+      final backCamera = cameras.firstWhere(
+        (camera) => camera.lensDirection == CameraLensDirection.back,
+        orElse: () => cameras.first,
+      );
+
+      final controller = CameraController(
+        backCamera,
+        ResolutionPreset.high,
+        enableAudio: false, // Menghindari meminta izin mikrofon
+      );
+
+      await controller.initialize();
+      
+      if (!mounted) return;
+
+      setState(() {
+        _cameraController = controller;
+        _isCameraInitialized = true;
+        _isCameraInitializing = false;
+      });
+    } catch (e) {
+      debugPrint('Error initializing camera: $e');
+      if (mounted) {
+        setState(() {
+          _isCameraInitializing = false;
+        });
+        _showError('Gagal mengaktifkan kamera: $e');
+      }
+    }
+  }
+
+  @override
+  void didChangeAppLifecycleState(AppLifecycleState state) {
+    final CameraController? cameraController = _cameraController;
+
+    if (cameraController == null || !cameraController.value.isInitialized) {
+      return;
+    }
+
+    if (state == AppLifecycleState.inactive) {
+      cameraController.dispose();
+      setState(() {
+        _isCameraInitialized = false;
+      });
+    } else if (state == AppLifecycleState.resumed) {
+      _initializeCamera();
+    }
+  }
+
   @override
   void dispose() {
+    WidgetsBinding.instance.removeObserver(this);
+    _cameraController?.dispose();
     _scanController.dispose();
     super.dispose();
   }
 
   Future<void> _captureImage() async {
     if (_isPicking) return;
-    setState(() => _isPicking = true);
 
-    try {
-      final photo = await _picker.pickImage(
-        source: ImageSource.camera,
-        imageQuality: 90,
-      );
-
-      if (photo != null) {
+    if (_isCameraInitialized && _cameraController != null) {
+      setState(() => _isPicking = true);
+      try {
+        final photo = await _cameraController!.takePicture();
         setState(() {
           _selectedPaths.add(photo.path);
         });
@@ -84,11 +154,45 @@ class _ScannerPageState extends State<ScannerPage>
             );
           }
         }
+      } catch (e) {
+        _showError('Gagal mengambil foto: $e');
+      } finally {
+        if (mounted) setState(() => _isPicking = false);
       }
-    } catch (e) {
-      _showError('Gagal mengakses kamera: $e');
-    } finally {
-      if (mounted) setState(() => _isPicking = false);
+    } else {
+      // Fallback ke ImagePicker jika kamera internal gagal diinisialisasi
+      setState(() => _isPicking = true);
+      try {
+        final photo = await _picker.pickImage(
+          source: ImageSource.camera,
+          imageQuality: 90,
+        );
+
+        if (photo != null) {
+          setState(() {
+            _selectedPaths.add(photo.path);
+          });
+
+          if (!_isMultiPage) {
+            await _startProcessing();
+          } else {
+            if (mounted) {
+              ScaffoldMessenger.of(context).showSnackBar(
+                const SnackBar(
+                  content: Text('Halaman berhasil ditambahkan!'),
+                  duration: Duration(seconds: 1),
+                  behavior: SnackBarBehavior.floating,
+                  backgroundColor: Color(0xFF004625),
+                ),
+              );
+            }
+          }
+        }
+      } catch (e) {
+        _showError('Gagal mengakses kamera: $e');
+      } finally {
+        if (mounted) setState(() => _isPicking = false);
+      }
     }
   }
 
@@ -344,37 +448,56 @@ class _ScannerPageState extends State<ScannerPage>
       ),
       body: Column(
         children: [
-          // Tampilan simulasi kamera
+          // Preview Kamera Terintegrasi
           Expanded(
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Latar belakang gelap area kamera
+                // Live Camera Preview atau Loading State
                 Container(
                   color: const Color(0xFF070B08),
                   width: double.infinity,
                   height: double.infinity,
-                  child: Center(
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        Icon(
-                          Icons.camera_alt_rounded,
-                          color: Colors.white.withOpacity(0.04),
-                          size: 96,
-                        ),
-                        const SizedBox(height: 8),
-                        Text(
-                          'Lensa Kamera Aktif',
-                          style: TextStyle(
-                            color: Colors.white.withOpacity(0.15),
-                            fontSize: 13,
-                            fontWeight: FontWeight.w500,
+                  child: _isCameraInitialized && _cameraController != null
+                      ? ClipRect(
+                          child: FittedBox(
+                            fit: BoxFit.cover,
+                            child: SizedBox(
+                              width: MediaQuery.of(context).size.width,
+                              child: AspectRatio(
+                                aspectRatio: _cameraController!.value.aspectRatio,
+                                child: CameraPreview(_cameraController!),
+                              ),
+                            ),
+                          ),
+                        )
+                      : Center(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              if (_isCameraInitializing)
+                                const CircularProgressIndicator(
+                                  color: Color(0xFFFCBF48),
+                                )
+                              else ...[
+                                Icon(
+                                  Icons.camera_alt_rounded,
+                                  color: Colors.white.withOpacity(0.04),
+                                  size: 96,
+                                ),
+                                const SizedBox(height: 8),
+                                Text(
+                                  'Kamera sedang bersiap...',
+                                  style: TextStyle(
+                                    color: Colors.white.withOpacity(0.15),
+                                    fontSize: 13,
+                                    fontWeight: FontWeight.w500,
+                                  ),
+                                ),
+                              ],
+                            ],
                           ),
                         ),
-                      ],
-                    ),
-                  ),
                 ),
 
                 // Garis bantu pemosisian gambar (grid)
