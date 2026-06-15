@@ -24,20 +24,20 @@ class _ScannerPageState extends State<ScannerPage>
   final _picker = ImagePicker();
   final List<String> _selectedPaths = [];
   bool _isPicking = false;
-  bool _isMultiPage = false; // Toggles between 1 Page vs Multi Page
+  bool _isMultiPage = false; // Mode single atau multi halaman
   late AnimationController _scanController;
 
   @override
   void initState() {
     super.initState();
-    _isMultiPage = !widget.fromCamera; // default to multi-page if gallery, single if camera
+    _isMultiPage = !widget.fromCamera; // Pilih mode multi-page otomatis jika dari galeri
 
     _scanController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 3),
     )..repeat(reverse: true);
 
-    // Automatically trigger initial action based on home page tap
+    // Jalankan aksi otomatis pertama kali halaman dibuka
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (widget.fromCamera) {
         _captureImage();
@@ -69,10 +69,10 @@ class _ScannerPageState extends State<ScannerPage>
         });
 
         if (!_isMultiPage) {
-          // Single page: immediately start processing
+          // Mode single: langsung mulai proses
           await _startProcessing();
         } else {
-          // Multi page: show quick toast feedback
+          // Mode multi: tampilkan toast pesan singkat
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -98,7 +98,7 @@ class _ScannerPageState extends State<ScannerPage>
 
     try {
       if (!_isMultiPage) {
-        // Single page mode: Pick single image
+        // Mode single: pilih satu gambar saja
         final photo = await _picker.pickImage(
           source: ImageSource.gallery,
           imageQuality: 90,
@@ -108,7 +108,7 @@ class _ScannerPageState extends State<ScannerPage>
           await _startProcessing();
         }
       } else {
-        // Multi page mode: Pick multiple assets
+        // Mode multi: pilih banyak gambar
         final assets = await AssetPicker.pickAssets(
           context,
           pickerConfig: AssetPickerConfig(
@@ -174,7 +174,7 @@ class _ScannerPageState extends State<ScannerPage>
   void _showCapturedImagesSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0A100D), // dark matching viewfinder
+      backgroundColor: const Color(0xFF0A100D), // warna gelap mirip kamera
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -344,12 +344,12 @@ class _ScannerPageState extends State<ScannerPage>
       ),
       body: Column(
         children: [
-          // Camera Viewfinder Mockup
+          // Tampilan simulasi kamera
           Expanded(
             child: Stack(
               alignment: Alignment.center,
               children: [
-                // Dark Camera Overlay Background
+                // Latar belakang gelap area kamera
                 Container(
                   color: const Color(0xFF070B08),
                   width: double.infinity,
@@ -377,20 +377,20 @@ class _ScannerPageState extends State<ScannerPage>
                   ),
                 ),
 
-                // Rule-of-Thirds Grid Overlay
+                // Garis bantu pemosisian gambar (grid)
                 Positioned.fill(
                   child: CustomPaint(
                     painter: _GridPainter(),
                   ),
                 ),
 
-                // Dotted Document Frame Guide
+                // Bingkai penanda letak dokumen
                 Padding(
                   padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 80.0),
                   child: Container(
                     child: Stack(
                       children: [
-                        // Dotted Border Box
+                        // Kotak dengan garis putus-putus
                         Container(
                           decoration: BoxDecoration(
                             border: Border.all(
@@ -401,13 +401,13 @@ class _ScannerPageState extends State<ScannerPage>
                           ),
                         ),
 
-                        // Corner Brackets
+                        // Siku-siku di setiap sudut bingkai
                         const Positioned(top: 0, left: 0, child: _CornerBracket(top: true, left: true)),
                         const Positioned(top: 0, right: 0, child: _CornerBracket(top: true, left: false)),
                         const Positioned(bottom: 0, left: 0, child: _CornerBracket(top: false, left: true)),
                         const Positioned(bottom: 0, right: 0, child: _CornerBracket(top: false, left: false)),
 
-                        // Animated Gold Laser Line
+                        // Animasi garis laser berwarna emas
                         Positioned.fill(
                           child: ClipRRect(
                             borderRadius: BorderRadius.circular(16),
@@ -447,7 +447,7 @@ class _ScannerPageState extends State<ScannerPage>
                   ),
                 ),
 
-                // Header Guidance Overlay
+                // Teks petunjuk di atas kamera
                 Positioned(
                   top: 20,
                   child: Container(
@@ -471,14 +471,14 @@ class _ScannerPageState extends State<ScannerPage>
             ),
           ),
 
-          // Shutter Control Area
+          // Area tombol shutter kamera
           Container(
             color: const Color(0xFF0F172A), // Slate 900
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Mode Toggle Switch
+                // Switch pilihan mode scan
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
@@ -503,17 +503,17 @@ class _ScannerPageState extends State<ScannerPage>
                 ),
                 const SizedBox(height: 24),
 
-                // Shutter Control Buttons Row
+                // Baris tombol kontrol utama
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Import Gallery Button (Left)
+                    // Tombol Galeri (Kiri)
                     _buildGalleryButton(),
 
-                    // Shutter Trigger (Center)
+                    // Tombol Jepret Foto (Tengah)
                     _buildShutterButton(),
 
-                    // Process/Review Thumbnail (Right)
+                    // Tombol Selesai / Review (Kanan)
                     _buildReviewDoneButton(),
                   ],
                 ),
@@ -592,7 +592,7 @@ class _ScannerPageState extends State<ScannerPage>
         child: Container(
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFFCBF48), // Gold shutter
+            color: Color(0xFFFCBF48), // Tombol shutter warna emas
           ),
           child: const Icon(Icons.camera_alt_rounded, color: Color(0xFF004625), size: 28),
         ),
@@ -680,7 +680,7 @@ class _GridPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.08)
       ..strokeWidth = 1.0;
 
-    // Draw grid rule-of-thirds lines
+    // Menggambar garis bantu grid
     canvas.drawLine(Offset(size.width / 3, 0), Offset(size.width / 3, size.height), paint);
     canvas.drawLine(Offset(size.width * 2 / 3, 0), Offset(size.width * 2 / 3, size.height), paint);
 

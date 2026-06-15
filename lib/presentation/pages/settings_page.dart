@@ -82,7 +82,7 @@ class _SettingsPageState extends State<SettingsPage> {
                 child: Column(
                   crossAxisAlignment: CrossAxisAlignment.start,
                   children: [
-                    // Section Header: API Configuration
+                    // Bagian Judul: Konfigurasi API
                     _buildSectionHeader(
                       context,
                       title: 'Konfigurasi Spreadsheet',
@@ -90,7 +90,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 16),
                     
-                    // TextFormField
+                    // Kolom input teks untuk URL
                     TextFormField(
                       controller: _urlController,
                       maxLines: 3,
@@ -116,7 +116,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 16),
                     
-                    // Buttons: Save & Clear
+                    // Tombol: Simpan & Bersihkan
                     Row(
                       children: [
                         Expanded(
@@ -138,7 +138,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 40),
 
-                    // Section Header: Developer Profile
+                    // Bagian Judul: Profil Kelompok Pengembang
                     _buildSectionHeader(
                       context,
                       title: 'Profil Kelompok Pengembang',
@@ -146,7 +146,7 @@ class _SettingsPageState extends State<SettingsPage> {
                     ),
                     const SizedBox(height: 16),
 
-                    // Developer Card
+                    // Kartu Profil Pengembang
                     _buildDeveloperCard(context),
                   ],
                 ),

@@ -156,7 +156,7 @@ class DashboardShellState extends State<DashboardShell> {
               ),
             ),
             const SizedBox(height: 4),
-            // Indication dot below the active navigation item
+            // Titik penanda untuk menu aktif
             AnimatedContainer(
               duration: const Duration(milliseconds: 200),
               width: isActive ? 6 : 0,

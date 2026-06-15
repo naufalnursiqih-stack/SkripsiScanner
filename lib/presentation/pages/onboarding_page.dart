@@ -70,7 +70,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
       body: SafeArea(
         child: Column(
           children: [
-            // Top App Bar
+            // Bagian Atas Halaman
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
               child: Row(
@@ -107,7 +107,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
             ),
 
-            // Sliding Views
+            // Tampilan Geser Onboarding
             Expanded(
               child: PageView.builder(
                 controller: _pageController,
@@ -124,7 +124,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                     child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
-                        // Image Container
+                        // Kontainer Gambar
                         Expanded(
                           child: Center(
                             child: AspectRatio(
@@ -146,7 +146,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                 child: Stack(
                                   alignment: Alignment.center,
                                   children: [
-                                    // Main Illustration Image
+                                    // Gambar Ilustrasi Utama
                                     ClipRRect(
                                       borderRadius: BorderRadius.circular(12),
                                       child: Image.asset(
@@ -165,7 +165,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                                       ),
                                     ),
 
-                                    // Decorative scanning overlay for Step 1
+                                    // Overlay animasi pemindai dekoratif untuk Langkah 1
                                     if (slide.hasScanningOverlay)
                                       const _ScanningOverlay(),
                                   ],
@@ -176,7 +176,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                         ),
                         const SizedBox(height: 24),
 
-                        // Title & Subtitle text
+                        // Teks Judul & Subjudul
                         Text(
                           slide.title,
                           style: const TextStyle(
@@ -210,12 +210,12 @@ class _OnboardingPageState extends State<OnboardingPage> {
               ),
             ),
 
-            // Pagination Indicator & Actions
+            // Indikator Halaman & Aksi
             Padding(
               padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
               child: Column(
                 children: [
-                  // Page Indicators
+                  // Titik Indikator Halaman
                   Row(
                     mainAxisAlignment: MainAxisAlignment.center,
                     children: List.generate(_slides.length, (index) {
@@ -234,7 +234,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   const SizedBox(height: 24),
 
-                  // Action Button
+                  // Tombol Aksi
                   SizedBox(
                     width: double.infinity,
                     height: 56,
@@ -267,7 +267,7 @@ class _OnboardingPageState extends State<OnboardingPage> {
                   ),
                   const SizedBox(height: 12),
                   
-                  // Step Label
+                  // Keterangan Langkah
                   Text(
                     'Langkah ${_currentIndex + 1} dari ${_slides.length}',
                     style: const TextStyle(
@@ -336,7 +336,7 @@ class _ScanningOverlayState extends State<_ScanningOverlay>
         padding: const EdgeInsets.all(16.0),
         child: Stack(
           children: [
-            // Dotted HUD Corners
+            // Garis bingkai luar putus-putus
             Container(
               decoration: BoxDecoration(
                 border: Border.all(color: Colors.green.withOpacity(0.12), width: 1.5),
@@ -344,7 +344,7 @@ class _ScanningOverlayState extends State<_ScanningOverlay>
               ),
             ),
             
-            // Custom HUD Corners (Decorative)
+            // Siku-siku dekorasi bingkai
             const Positioned(
               top: 0, left: 0,
               child: _CornerBorder(top: true, left: true),
@@ -362,7 +362,7 @@ class _ScanningOverlayState extends State<_ScanningOverlay>
               child: _CornerBorder(top: false, left: false),
             ),
 
-            // Moving Scan Line
+            // Garis pemindai yang bergerak
             AnimatedBuilder(
               animation: _animationController,
               builder: (context, child) {

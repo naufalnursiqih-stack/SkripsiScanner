@@ -20,13 +20,13 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
   void initState() {
     super.initState();
     
-    // Scanner Laser Line Animation (repeats up and down)
+    // Animasi garis laser scanner (mengulang naik turun)
     _scanController = AnimationController(
       vsync: this,
       duration: const Duration(seconds: 2),
     )..repeat(reverse: true);
 
-    // Simulate progress bar loading (0.0 to 1.0 in ~2.5 seconds)
+    // Simulasi loading progress bar (0.0 sampai 1.0 dalam waktu ~2.5 detik)
     _startProgress();
   }
 
@@ -67,22 +67,22 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
   @override
   Widget build(BuildContext context) {
-    // Theme colors matching UIN Alauddin Makassar (Hijau UIN & Emas UIN)
-    const primaryContainerColor = Color(0xFF1E5E3A); // Deep Green
-    const goldColor = Color(0xFFFCBF48); // Academic Gold Accent
+    // Warna tema sesuai UIN Alauddin Makassar (Hijau UIN & Emas UIN)
+    const primaryContainerColor = Color(0xFF1E5E3A); // Hijau Tua
+    const goldColor = Color(0xFFFCBF48); // Aksen Emas UIN
 
     return Scaffold(
       backgroundColor: primaryContainerColor,
       body: Stack(
         children: [
-          // Background Dot Grid Texture
+          // Tekstur latar belakang pola titik (grid)
           Positioned.fill(
             child: CustomPaint(
               painter: _DotGridPainter(),
             ),
           ),
           
-          // Main Content Layout
+          // Tata letak konten utama
           SafeArea(
             child: Center(
               child: Column(
@@ -90,12 +90,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
                 children: [
                   const Spacer(flex: 3),
 
-                  // Logo Container with Scanning Animation
+                  // Wadah logo dengan animasi pemindaian
                   _buildScanningLogo(goldColor),
 
                   const SizedBox(height: 32),
 
-                  // Brand Text Content
+                  // Teks nama aplikasi
                   const Text(
                     'SkripsiScan',
                     style: TextStyle(
@@ -120,12 +120,12 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
 
                   const Spacer(flex: 2),
 
-                  // Loading State Indicator
+                  // Indikator status loading
                   Padding(
                     padding: const EdgeInsets.symmetric(horizontal: 48),
                     child: Column(
                       children: [
-                        // Progress Bar Container
+                        // Wadah progress bar
                         Container(
                           height: 4,
                           width: 180,
@@ -190,18 +190,18 @@ class _SplashPageState extends State<SplashPage> with TickerProviderStateMixin {
       child: Stack(
         clipBehavior: Clip.none,
         children: [
-          // SVG Book representation
+          // Desain buku menggunakan CustomPaint
           Positioned.fill(
             child: CustomPaint(
               painter: _BookLogoPainter(bookColor: const Color(0xFF1E5E3A)),
             ),
           ),
 
-          // Scanning Laser Line Overlay
+          // Garis laser pemindai di atas logo
           AnimatedBuilder(
             animation: _scanController,
             builder: (context, child) {
-              // Animating the laser line from top to bottom (0 to 100px)
+              // Menggerakkan garis laser dari atas ke bawah (0 sampai 100px)
               final topOffset = _scanController.value * 100;
               return Positioned(
                 top: topOffset,
@@ -246,14 +246,14 @@ class _BookLogoPainter extends CustomPainter {
       ..color = bookColor
       ..style = PaintingStyle.fill;
 
-    // Draw main book outline (Centered shape)
+    // Menggambar pola luar buku (posisi di tengah)
     final RRect bookRect = RRect.fromLTRBR(
       15, 10, size.width - 15, size.height - 10,
       const Radius.circular(8),
     );
     canvas.drawRRect(bookRect, paint);
 
-    // Draw pages accent lines inside the book (White color lines)
+    // Menggambar garis putih halaman di dalam buku
     final linePaint = Paint()
       ..color = Colors.white
       ..strokeWidth = 3
