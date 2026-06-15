@@ -77,11 +77,18 @@ class _ScannerPageState extends State<ScannerPage>
 
       final controller = CameraController(
         backCamera,
-        ResolutionPreset.high,
+        ResolutionPreset.max,
         enableAudio: false, // Menghindari meminta izin mikrofon
       );
 
       await controller.initialize();
+      
+      // Aktifkan autofocus secara otomatis agar gambar teks tajam dan akurat untuk OCR
+      try {
+        await controller.setFocusMode(FocusMode.auto);
+      } catch (e) {
+        debugPrint('Autofocus tidak didukung: $e');
+      }
       
       if (!mounted) return;
 
