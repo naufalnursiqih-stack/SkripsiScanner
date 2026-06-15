@@ -27,9 +27,11 @@ class ApiService {
   final _client = http.Client();
 
   /// Sends a single thesis record to the Google Apps Script endpoint.
-  Future<ApiResult> sendThesis(ThesisModel thesis) async {
+  Future<ApiResult> sendThesis(ThesisModel thesis, {required String spreadsheetUrl}) async {
     try {
-      final payload = jsonEncode(thesis.toApiPayload());
+      final Map<String, dynamic> payloadMap = thesis.toApiPayload();
+      payloadMap['spreadsheetUrl'] = spreadsheetUrl;
+      final payload = jsonEncode(payloadMap);
 
       var response = await _client
           .post(
@@ -66,9 +68,10 @@ class ApiService {
   }
 
   /// Sends multiple thesis records in one batch POST request.
-  Future<ApiResult> sendBatch(List<ThesisModel> theses) async {
+  Future<ApiResult> sendBatch(List<ThesisModel> theses, {required String spreadsheetUrl}) async {
     try {
       final payload = jsonEncode({
+        'spreadsheetUrl': spreadsheetUrl,
         'batch': theses.map((t) => t.toApiPayload()).toList(),
       });
 

@@ -39,6 +39,7 @@ dependencies:
   wechat_assets_picker: ^10.1.2
   google_mlkit_text_recognition: ^0.15.1
   http: ^1.6.0
+  shared_preferences: ^2.3.3
   uuid: ^4.5.3
   flutter_image_compress: ^2.4.0
 
