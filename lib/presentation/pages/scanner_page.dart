@@ -31,6 +31,7 @@ class _ScannerPageState extends State<ScannerPage>
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isCameraInitializing = false;
+  FlashMode _flashMode = FlashMode.off;
 
   @override
   void initState() {
@@ -105,6 +106,20 @@ class _ScannerPageState extends State<ScannerPage>
         });
         _showError('Gagal mengaktifkan kamera: $e');
       }
+    }
+  }
+
+  Future<void> _toggleFlash() async {
+    if (_cameraController == null || !_isCameraInitialized) return;
+
+    final newMode = _flashMode == FlashMode.off ? FlashMode.torch : FlashMode.off;
+    try {
+      await _cameraController!.setFlashMode(newMode);
+      setState(() {
+        _flashMode = newMode;
+      });
+    } catch (e) {
+      debugPrint('Gagal menyetel flash: $e');
     }
   }
 
@@ -452,6 +467,20 @@ class _ScannerPageState extends State<ScannerPage>
           icon: const Icon(Icons.arrow_back_ios_new_rounded),
           onPressed: () => Navigator.pop(context),
         ),
+        actions: [
+          if (_isCameraInitialized && _cameraController != null)
+            IconButton(
+              icon: Icon(
+                _flashMode == FlashMode.torch
+                    ? Icons.flash_on_rounded
+                    : Icons.flash_off_rounded,
+                color: _flashMode == FlashMode.torch
+                    ? const Color(0xFFFCBF48)
+                    : Colors.white,
+              ),
+              onPressed: _toggleFlash,
+            ),
+        ],
       ),
       body: Column(
         children: [
