@@ -459,17 +459,35 @@ class _ScannerPageState extends State<ScannerPage>
                   width: double.infinity,
                   height: double.infinity,
                   child: _isCameraInitialized && _cameraController != null
-                      ? ClipRect(
-                          child: FittedBox(
-                            fit: BoxFit.cover,
-                            child: SizedBox(
-                              width: MediaQuery.of(context).size.width,
-                              child: AspectRatio(
-                                aspectRatio: _cameraController!.value.aspectRatio,
-                                child: CameraPreview(_cameraController!),
+                      ? LayoutBuilder(
+                          builder: (context, constraints) {
+                            final camera = _cameraController!.value;
+                            // Rasio aspek kamera (lanskap, e.g. 1.777) diubah ke potret (1 / 1.777 = 0.5625)
+                            final cameraRatio = 1 / camera.aspectRatio;
+                            
+                            // Rasio aspek dari area tampilan container
+                            final containerRatio = constraints.maxWidth / constraints.maxHeight;
+                            
+                            // Hitung skala perbesaran agar memenuhi layar tanpa merusak rasio (tidak penyok)
+                            double scale = 1.0;
+                            if (containerRatio > cameraRatio) {
+                              scale = containerRatio / cameraRatio;
+                            } else {
+                              scale = cameraRatio / containerRatio;
+                            }
+                            
+                            return ClipRect(
+                              child: Transform.scale(
+                                scale: scale,
+                                child: Center(
+                                  child: AspectRatio(
+                                    aspectRatio: cameraRatio,
+                                    child: CameraPreview(_cameraController!),
+                                  ),
+                                ),
                               ),
-                            ),
-                          ),
+                            );
+                          },
                         )
                       : Center(
                           child: Column(
