@@ -8,56 +8,84 @@ import 'scanner_page.dart';
 import 'review_page.dart';
 import 'dashboard_shell.dart';
 import 'edit_page.dart';
+import '../widgets/thesis_card.dart';
 
-class HomePage extends StatelessWidget {
+class HomePage extends StatefulWidget {
   const HomePage({super.key});
 
   @override
+  State<HomePage> createState() => _HomePageState();
+}
+
+class _HomePageState extends State<HomePage> {
+  final TextEditingController _searchController = TextEditingController();
+  String _searchQuery = '';
+  bool _isSelectionMode = false;
+  final Set<String> _selectedItemIds = {};
+
+  // Konstanta Desain Global untuk Harmonisasi Visual
+  static const double _globalRadius = 16.0; // Poin 2: Konsistensi Corner Radius
+  static const Color _uinGreen = Color(0xFF1E5E3A);
+  static const Color _uinGold = Color(0xFFFCBF48);
+  static const Color _cardBgDark = Color(0xFF133C25);
+
+  @override
+  void dispose() {
+    _searchController.dispose();
+    super.dispose();
+  }
+
+  @override
   Widget build(BuildContext context) {
+    final provider = context.watch<ScanProvider>();
+    final items = provider.items;
+
+    if (items.isEmpty && _isSelectionMode) {
+      WidgetsBinding.instance.addPostFrameCallback((_) {
+        if (mounted) {
+          setState(() {
+            _isSelectionMode = false;
+            _selectedItemIds.clear();
+          });
+        }
+      });
+    }
+
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF7),
+      backgroundColor: _uinGreen,
       body: Stack(
         children: [
-          // Background Dot Grid Texture
           Positioned.fill(
             child: CustomPaint(
               painter: _DotGridPainter(),
             ),
           ),
-          
-          // Main Scrollable Body
           SafeArea(
             child: Column(
               children: [
-                // Glassmorphic Top App Bar
-                _buildTopAppBar(context),
-                
-                // Content Scroll View
+                _buildTopAppBar(context, provider),
                 Expanded(
                   child: SingleChildScrollView(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 16),
+                    padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 16),
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Stats Card Grid Row
-                        _buildStatsRow(context),
+                        // Poin 3: Tombol Aksi Utama naik ke atas (Hierarki Pertama setelah App Bar)
+                        _buildActionGrid(context),
                         const SizedBox(height: 24),
-                        
-                        // Capture Options (Gallery / Camera)
-                        _buildActionCards(context),
+
+                        _buildStatsRow(context),
                         const SizedBox(height: 28),
                         
-                        // Recent Activity Segment
-                        _buildRecentActivity(context),
+                        // Riwayat Aktivitas beserta Search Bar di dalamnya
+                        _buildRecentActivitySection(context),
                         const SizedBox(height: 24),
-                        
-                        // Bottom buttons (if queue is not empty)
-                        _buildBottomActions(context),
-                        const SizedBox(height: 16),
                       ],
                     ),
                   ),
                 ),
+                if (_isSelectionMode && items.isNotEmpty)
+                  _buildSendBar(context, provider),
               ],
             ),
           ),
@@ -66,20 +94,90 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildTopAppBar(BuildContext context) {
+  Widget _buildTopAppBar(BuildContext context, ScanProvider provider) {
+    final items = provider.items;
+
+    if (_isSelectionMode) {
+      return Container(
+        height: 64,
+        width: double.infinity,
+        padding: const EdgeInsets.symmetric(horizontal: 16),
+        color: _cardBgDark,
+        child: Row(
+          children: [
+            IconButton(
+              icon: const Icon(Icons.close_rounded, color: Colors.white),
+              onPressed: () {
+                if (provider.state == ProviderState.done) {
+                  provider.resetState();
+                }
+                setState(() {
+                  _isSelectionMode = false;
+                  _selectedItemIds.clear();
+                });
+              },
+            ),
+            const SizedBox(width: 8),
+            Text(
+              '${_selectedItemIds.length} Terpilih',
+              style: const TextStyle(
+                fontSize: 18,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
+                fontFamily: 'Inter',
+              ),
+            ),
+            const Spacer(),
+            TextButton(
+              onPressed: () {
+                setState(() {
+                  if (_selectedItemIds.length == items.length) {
+                    _selectedItemIds.clear();
+                    _isSelectionMode = false;
+                  } else {
+                    _selectedItemIds.addAll(items.map((e) => e.id));
+                  }
+                });
+              },
+              child: Text(
+                _selectedItemIds.length == items.length ? 'Batal Semua' : 'Pilih Semua',
+                style: const TextStyle(
+                  color: _uinGold,
+                  fontWeight: FontWeight.bold,
+                  fontFamily: 'Inter',
+                ),
+              ),
+            ),
+            PopupMenuButton<String>(
+              icon: const Icon(Icons.more_vert_rounded, color: Colors.white),
+              onSelected: (value) {
+                if (value == 'delete_all') {
+                  _showClearDialog(context, provider);
+                }
+              },
+              itemBuilder: (BuildContext context) => [
+                const PopupMenuItem<String>(
+                  value: 'delete_all',
+                  child: Row(
+                    children: [
+                      Icon(Icons.delete_forever_rounded, color: Colors.red),
+                      SizedBox(width: 8),
+                      Text('Hapus Semua'),
+                    ],
+                  ),
+                ),
+              ],
+            ),
+          ],
+        ),
+      );
+    }
+
     return Container(
       height: 64,
       width: double.infinity,
       padding: const EdgeInsets.symmetric(horizontal: 16),
-      decoration: BoxDecoration(
-        color: Colors.white.withOpacity(0.85),
-        border: Border(
-          bottom: BorderSide(
-            color: const Color(0xFFC0C9BF).withOpacity(0.2),
-            width: 1.0,
-          ),
-        ),
-      ),
+      color: Colors.transparent,
       child: const Center(
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
@@ -87,9 +185,9 @@ class HomePage extends StatelessWidget {
             Text(
               'SkripsiScan',
               style: TextStyle(
-                fontSize: 20,
-                fontWeight: FontWeight.w800,
-                color: Color(0xFF004625),
+                fontSize: 22,
+                fontWeight: FontWeight.bold,
+                color: Colors.white,
                 fontFamily: 'Inter',
                 letterSpacing: -0.5,
               ),
@@ -97,13 +195,71 @@ class HomePage extends StatelessWidget {
             Text(
               'Selamat Datang',
               style: TextStyle(
-                fontSize: 11,
-                color: Color(0xFF707971),
-                fontWeight: FontWeight.w600,
+                fontSize: 12,
+                color: Colors.white70,
+                fontWeight: FontWeight.w500,
                 fontFamily: 'Inter',
               ),
             ),
           ],
+        ),
+      ),
+    );
+  }
+
+  // Poin 3: Search bar dimodifikasi agar harmonis dan diletakkan di atas list aktivitas
+  Widget _buildSearchBar(BuildContext context) {
+    return Container(
+      clipBehavior: Clip.antiAlias,
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(_globalRadius), // Poin 2: Mengikuti radius global
+        border: Border.all(
+          color: const Color(0xFFBEC9C2).withOpacity(0.3),
+          width: 1.0,
+        ),
+      ),
+      child: TextField(
+        controller: _searchController,
+        style: const TextStyle(
+          color: Color(0xFF191C1E),
+          fontSize: 14,
+          fontFamily: 'Inter',
+        ),
+        onChanged: (value) {
+          setState(() {
+            _searchQuery = value.trim();
+          });
+        },
+        decoration: InputDecoration(
+          filled: true,
+          fillColor: Colors.transparent,
+          hintText: 'Cari riwayat dokumen...',
+          hintStyle: const TextStyle(
+            color: Color(0xFF6F7973),
+            fontSize: 14,
+            fontFamily: 'Inter',
+          ),
+          prefixIcon: const Icon(
+            Icons.search_rounded,
+            color: Color(0xFF6F7973),
+          ),
+          suffixIcon: _searchQuery.isNotEmpty
+              ? IconButton(
+                  icon: const Icon(Icons.clear_rounded, color: Color(0xFF6F7973)),
+                  onPressed: () {
+                    _searchController.clear();
+                    setState(() {
+                      _searchQuery = '';
+                    });
+                  },
+                )
+              : null,
+          border: InputBorder.none,
+          enabledBorder: InputBorder.none,
+          focusedBorder: InputBorder.none,
+          disabledBorder: InputBorder.none,
+          contentPadding: const EdgeInsets.symmetric(vertical: 14, horizontal: 16),
         ),
       ),
     );
@@ -118,27 +274,30 @@ class HomePage extends StatelessWidget {
               label: 'TOTAL SCAN',
               value: '${provider.items.length}',
               icon: Icons.search_rounded,
-              iconBgColor: const Color(0xFFEFF4FF),
-              iconColor: const Color(0xFF004625),
-              valueColor: const Color(0xFF004625),
+              iconBgColor: const Color(0xFFEAF0EC),
+              iconColor: _uinGreen,
+              valueColor: _uinGreen,
+              globalRadius: _globalRadius, // Poin 2
             ),
             const SizedBox(width: 8),
             _StatCard(
               label: 'BERHASIL',
               value: '${provider.successItems.length}',
               icon: Icons.check_circle_rounded,
-              iconBgColor: const Color(0xFFE8F5E9),
-              iconColor: const Color(0xFF0E9F6E),
-              valueColor: const Color(0xFF0E9F6E),
+              iconBgColor: const Color(0xFFD1FAE5),
+              iconColor: const Color(0xFF059669),
+              valueColor: const Color(0xFF059669),
+              globalRadius: _globalRadius, // Poin 2
             ),
             const SizedBox(width: 8),
             _StatCard(
               label: 'GAGAL',
               value: '${provider.failedItems.length}',
               icon: Icons.cancel_rounded,
-              iconBgColor: const Color(0xFFFEE2E2),
-              iconColor: const Color(0xFFE02424),
-              valueColor: const Color(0xFFE02424),
+              iconBgColor: const Color(0xFFFFE4E6),
+              iconColor: const Color(0xFFE11D48),
+              valueColor: const Color(0xFFE11D48),
+              globalRadius: _globalRadius, // Poin 2
             ),
           ],
         );
@@ -146,36 +305,146 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  Widget _buildActionCards(BuildContext context) {
-    return Column(
+  Widget _buildActionGrid(BuildContext context) {
+    return Row(
       children: [
-        _ActionCard(
-          title: 'Scan dari Galeri',
-          subtitle: 'Pilih dokumen yang sudah ada',
-          icon: Icons.photo_library_rounded,
-          gradient: const [Color(0xFF004625), Color(0xFF11512F)],
-          onTap: () => _navigateToScanner(context, fromCamera: false),
+        // ====== TOMBOL IMPORT GAMBAR ======
+        Expanded(
+          child: AspectRatio(
+            aspectRatio: 1.0,
+            child: InkWell(
+              onTap: () => _navigateToScanner(context, fromCamera: false),
+              borderRadius: BorderRadius.circular(_globalRadius),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _cardBgDark,
+                  borderRadius: BorderRadius.circular(_globalRadius), // Poin 2: Diubah ke 16.0
+                  border: Border.all(
+                    color: _uinGold.withOpacity(0.4),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _uinGold.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.image_outlined,
+                        color: _uinGold,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 8), // Poin 4: Jarak dirapatkan dari 12 ke 8 agar padat
+                    const Text(
+                      'Import Gambar',
+                      style: TextStyle(
+                        color: Colors.white, // Poin 1: Diubah ke Putih Bersih demi Aksesibilitas
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
-        const SizedBox(height: 12),
-        _ActionCard(
-          title: 'Scan dari Kamera',
-          subtitle: 'Ambil foto dokumen langsung',
-          icon: Icons.photo_camera_rounded,
-          gradient: const [Color(0xFF7D5800), Color(0xFFF9BC46)],
-          onTap: () => _navigateToScanner(context, fromCamera: true),
+        const SizedBox(width: 16),
+        
+        // ====== TOMBOL SCAN KAMERA ======
+        Expanded(
+          child: AspectRatio(
+            aspectRatio: 1.0,
+            child: InkWell(
+              onTap: () => _navigateToScanner(context, fromCamera: true),
+              borderRadius: BorderRadius.circular(_globalRadius),
+              child: Container(
+                decoration: BoxDecoration(
+                  color: _cardBgDark,
+                  borderRadius: BorderRadius.circular(_globalRadius), // Poin 2: Diubah ke 16.0
+                  border: Border.all(
+                    color: _uinGold.withOpacity(0.4),
+                    width: 1.5,
+                  ),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.15),
+                      blurRadius: 10,
+                      offset: const Offset(0, 4),
+                    ),
+                  ],
+                ),
+                child: Column(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                      width: 48,
+                      height: 48,
+                      decoration: BoxDecoration(
+                        color: _uinGold.withOpacity(0.15),
+                        borderRadius: BorderRadius.circular(12),
+                      ),
+                      child: const Icon(
+                        Icons.photo_camera_outlined,
+                        color: _uinGold,
+                        size: 28,
+                      ),
+                    ),
+                    const SizedBox(height: 8), // Poin 4: Jarak dirapatkan dari 12 ke 8 agar padat
+                    const Text(
+                      'Scan Kamera',
+                      style: TextStyle(
+                        color: Colors.white, // Poin 1: Diubah ke Putih Bersih demi Aksesibilitas
+                        fontSize: 13,
+                        fontWeight: FontWeight.bold,
+                        fontFamily: 'Inter',
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
         ),
       ],
     );
   }
 
-  Widget _buildRecentActivity(BuildContext context) {
+  // Poin 3 & Heuristic Layout: Penggabungan Search Bar ke dalam konteks Aktivitas Terakhir
+  Widget _buildRecentActivitySection(BuildContext context) {
     final shellState = context.findAncestorStateOfType<DashboardShellState>();
     
     return Consumer<ScanProvider>(
       builder: (context, provider, _) {
-        final recentItems = provider.items.length > 2
-            ? provider.items.sublist(provider.items.length - 2)
-            : provider.items;
+        final List<ThesisModel> displayItems;
+        if (_searchQuery.isEmpty) {
+          final rawRecent = provider.items.length > 2
+              ? provider.items.sublist(provider.items.length - 2)
+              : provider.items;
+          displayItems = rawRecent.reversed.toList();
+        } else {
+          final rawFiltered = provider.items.where((item) {
+            final query = _searchQuery.toLowerCase();
+            return item.title.toLowerCase().contains(query) ||
+                   item.name.toLowerCase().contains(query) ||
+                   item.nim.toLowerCase().contains(query);
+          }).toList();
+          displayItems = rawFiltered.reversed.toList();
+        }
 
         return Column(
           crossAxisAlignment: CrossAxisAlignment.start,
@@ -187,15 +456,15 @@ class HomePage extends StatelessWidget {
                   'Aktivitas Terakhir',
                   style: TextStyle(
                     fontSize: 18,
-                    fontWeight: FontWeight.bold,
-                    color: Color(0xFF004625),
+                    fontWeight: FontWeight.w600,
+                    color: Colors.white,
                     fontFamily: 'Inter',
                   ),
                 ),
                 TextButton(
                   onPressed: () {
                     if (shellState != null) {
-                      shellState.setTabIndex(1); // switch tab to review list
+                      shellState.setTabIndex(1);
                     } else {
                       Navigator.push(
                         context,
@@ -206,167 +475,103 @@ class HomePage extends StatelessWidget {
                   child: const Text(
                     'Lihat Semua',
                     style: TextStyle(
-                      fontSize: 13,
+                      fontSize: 12,
                       fontWeight: FontWeight.bold,
-                      color: Color(0xFF7D5800),
+                      color: _uinGold,
                       fontFamily: 'Inter',
                     ),
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 8),
-            if (recentItems.isEmpty)
+            const SizedBox(height: 10),
+            
+            // Kolom Search diletakkan di sini agar secara konteks sinkron dengan penyaringan data di bawahnya
+            _buildSearchBar(context),
+            const SizedBox(height: 16),
+
+            if (displayItems.isEmpty)
               Container(
                 width: double.infinity,
-                padding: const EdgeInsets.symmetric(vertical: 20, horizontal: 16),
+                padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
                   color: Colors.white,
-                  borderRadius: BorderRadius.circular(16),
-                  border: Border.all(color: Colors.grey.shade200),
-                ),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    const Text(
-                      'Belum ada aktivitas terbaru',
-                      style: TextStyle(
-                        color: Colors.grey,
-                        fontSize: 13,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                    const SizedBox(height: 12),
-                    ElevatedButton.icon(
-                      onPressed: () {
-                        final mockItem = ThesisModel(
-                          id: 'mock-id-${DateTime.now().millisecondsSinceEpoch}',
-                          imagePath: '',
-                          title: 'Implementasi Artificial Intelligence dalam Klasifikasi Judul Tugas Akhir Berbasis Web',
-                          name: 'Ahmad Dhani',
-                          nim: '10117234',
-                          year: '2024',
-                          advisor: 'Dr. Sri Mulyani, M.Kom',
-                          status: ScanStatus.success,
-                          scannedAt: DateTime.now(),
-                        );
-                        context.read<ScanProvider>().addThesis(mockItem);
-                        Navigator.push(
-                          context,
-                          MaterialPageRoute(
-                            builder: (_) => EditPage(thesis: mockItem),
-                          ),
-                        );
-                      },
-                      icon: const Icon(Icons.play_arrow_rounded, size: 18),
-                      label: const Text(
-                        'Simulasikan Hasil Scan (Demo)',
-                        style: TextStyle(
-                          fontSize: 13,
-                          fontWeight: FontWeight.w600,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: const Color(0xFFEFF4FF),
-                        foregroundColor: const Color(0xFF004625),
-                        elevation: 0,
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 10,
-                        ),
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
-                        ),
-                      ),
+                  borderRadius: BorderRadius.circular(_globalRadius),
+                  border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
+                  boxShadow: [
+                    BoxShadow(
+                      color: Colors.black.withOpacity(0.04),
+                      blurRadius: 12,
+                      offset: const Offset(0, 4),
                     ),
                   ],
+                ),
+                child: Center(
+                  child: Text(
+                    _searchQuery.isEmpty
+                        ? 'Belum ada aktivitas terbaru'
+                        : 'Tidak ada hasil pencarian untuk "$_searchQuery"',
+                    style: const TextStyle(
+                      color: Colors.grey,
+                      fontSize: 13,
+                      fontFamily: 'Inter',
+                    ),
+                  ),
                 ),
               )
             else
               ListView.separated(
                 shrinkWrap: true,
                 physics: const NeverScrollableScrollPhysics(),
-                itemCount: recentItems.length,
+                itemCount: displayItems.length,
                 separatorBuilder: (_, __) => const SizedBox(height: 10),
                 itemBuilder: (context, index) {
-                  // Show reverse chronological order
-                  final item = recentItems[recentItems.length - 1 - index];
-                  final isSuccess = item.status == ScanStatus.success;
-                  
-                  String fileName = 'Skripsi_Dokumen.png';
-                  if (item.imagePath.isNotEmpty) {
-                    fileName = item.imagePath.split('/').last.split('\\').last;
-                  }
-
-                  return Container(
-                    padding: const EdgeInsets.all(14),
-                    decoration: BoxDecoration(
-                      color: Colors.white,
-                      borderRadius: BorderRadius.circular(14),
-                      border: Border.all(color: Colors.grey.shade200),
-                    ),
-                    child: Row(
-                      children: [
-                        Container(
-                          width: 42,
-                          height: 42,
-                          decoration: BoxDecoration(
-                            color: const Color(0xFFEFF4FF),
-                            borderRadius: BorderRadius.circular(10),
+                  final item = displayItems[index];
+                  final isSelected = _selectedItemIds.contains(item.id);
+                  return GestureDetector(
+                    onTap: () {
+                      if (_isSelectionMode) {
+                        setState(() {
+                          if (isSelected) {
+                            _selectedItemIds.remove(item.id);
+                            if (_selectedItemIds.isEmpty) {
+                              _isSelectionMode = false;
+                            }
+                          } else {
+                            _selectedItemIds.add(item.id);
+                          }
+                        });
+                      } else {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditPage(thesis: item),
                           ),
-                          child: const Icon(
-                            Icons.description_rounded,
-                            color: Color(0xFF004625),
-                            size: 20,
+                        );
+                      }
+                    },
+                    onLongPress: () {
+                      if (!_isSelectionMode) {
+                        setState(() {
+                          _isSelectionMode = true;
+                          _selectedItemIds.add(item.id);
+                        });
+                      }
+                    },
+                    child: ThesisCard(
+                      thesis: item,
+                      showImage: true,
+                      isSelectionMode: _isSelectionMode,
+                      isSelected: isSelected,
+                      onEdit: () {
+                        Navigator.push(
+                          context,
+                          MaterialPageRoute(
+                            builder: (_) => EditPage(thesis: item),
                           ),
-                        ),
-                        const SizedBox(width: 12),
-                        Expanded(
-                          child: Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                item.title.isNotEmpty ? item.title : fileName,
-                                maxLines: 1,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  fontWeight: FontWeight.bold,
-                                  fontSize: 14,
-                                  color: Color(0xFF121C2A),
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                              const SizedBox(height: 2),
-                              Text(
-                                '${item.scannedAt.day} ${_getMonthName(item.scannedAt.month)} ${item.scannedAt.year}',
-                                style: TextStyle(
-                                  fontSize: 11,
-                                  color: Colors.grey.shade500,
-                                  fontFamily: 'Inter',
-                                ),
-                              ),
-                            ],
-                          ),
-                        ),
-                        const SizedBox(width: 12),
-                        Container(
-                          padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                          decoration: BoxDecoration(
-                            color: isSuccess ? const Color(0xFFDCFCE7) : const Color(0xFFFEE2E2),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
-                          child: Text(
-                            isSuccess ? 'BERHASIL' : 'GAGAL',
-                            style: TextStyle(
-                              color: isSuccess ? const Color(0xFF15803D) : const Color(0xFFB91C1C),
-                              fontSize: 10,
-                              fontWeight: FontWeight.w800,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ),
-                      ],
+                        );
+                      },
+                      onDelete: () => _showDeleteConfirmDialog(context, item, provider),
                     ),
                   );
                 },
@@ -377,88 +582,35 @@ class HomePage extends StatelessWidget {
     );
   }
 
-  String _getMonthName(int month) {
-    const months = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'Mei', 'Jun',
-      'Jul', 'Agt', 'Sep', 'Okt', 'Nov', 'Des'
-    ];
-    if (month >= 1 && month <= 12) {
-      return months[month - 1];
-    }
-    return '';
-  }
-
-  Widget _buildBottomActions(BuildContext context) {
-    final shellState = context.findAncestorStateOfType<DashboardShellState>();
-    
-    return Consumer<ScanProvider>(
-      builder: (context, provider, _) {
-        if (provider.items.isEmpty) return const SizedBox.shrink();
-        
-        return Column(
-          children: [
-            // Gold submit action button
-            SizedBox(
-              width: double.infinity,
-              height: 54,
-              child: ElevatedButton.icon(
-                onPressed: () {
-                  if (shellState != null) {
-                    shellState.setTabIndex(1);
-                  } else {
-                    Navigator.push(
-                      context,
-                      MaterialPageRoute(builder: (_) => const ReviewPage()),
-                    );
-                  }
-                },
-                style: ElevatedButton.styleFrom(
-                  backgroundColor: const Color(0xFFFFA900), // Rich Gold Accent
-                  foregroundColor: const Color(0xFF271900),
-                  elevation: 2,
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(27),
-                  ),
-                ),
-                icon: const Icon(Icons.send_rounded, size: 18),
-                label: Text(
-                  'Review & Kirim (${provider.items.length} Item)',
-                  style: const TextStyle(fontWeight: FontWeight.w800, fontSize: 14, fontFamily: 'Inter'),
-                ),
-              ),
-            ),
-            const SizedBox(height: 10),
-            
-            // Outlined wipe action button
-            SizedBox(
-              width: double.infinity,
-              height: 48,
-              child: OutlinedButton(
-                onPressed: () => _showClearDialog(context, provider),
-                style: OutlinedButton.styleFrom(
-                  foregroundColor: const Color(0xFFE02424),
-                  side: const BorderSide(color: Color(0xFFE02424), width: 1.5),
-                  shape: RoundedRectangleBorder(
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                ),
-                child: const Text(
-                  'Hapus Semua',
-                  style: TextStyle(fontWeight: FontWeight.bold, fontSize: 13, fontFamily: 'Inter'),
-                ),
-              ),
-            ),
-          ],
-        );
-      },
-    );
-  }
-
-  void _navigateToScanner(BuildContext context, {required bool fromCamera}) {
-    Navigator.push(
+  void _navigateToScanner(BuildContext context, {required bool fromCamera}) async {
+    final result = await Navigator.push(
       context,
       MaterialPageRoute(
         builder: (_) => ScannerPage(fromCamera: fromCamera),
+      ),
+    );
+    if (result == true && context.mounted) {
+      final shellState = context.findAncestorStateOfType<DashboardShellState>();
+      shellState?.setTabIndex(1);
+    }
+  }
+
+  void _showDeleteConfirmDialog(BuildContext context, ThesisModel thesis, ScanProvider provider) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Data?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Apakah Anda yakin ingin menghapus data "${thesis.title.isNotEmpty ? thesis.title : 'Dokumen'}" dari riwayat?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () {
+              provider.removeItem(thesis.id);
+              Navigator.pop(ctx);
+            },
+            child: const Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
       ),
     );
   }
@@ -474,6 +626,36 @@ class HomePage extends StatelessWidget {
           TextButton(
             onPressed: () {
               provider.clearAll();
+              setState(() {
+                _isSelectionMode = false;
+                _selectedItemIds.clear();
+              });
+              Navigator.pop(ctx);
+            },
+            child: const Text('Hapus Semua', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  void _showBatchDeleteDialog(BuildContext context, ScanProvider provider) {
+    showDialog(
+      context: context,
+      builder: (ctx) => AlertDialog(
+        title: const Text('Hapus Data Terpilih?', style: TextStyle(fontWeight: FontWeight.bold)),
+        content: Text('Apakah Anda yakin ingin menghapus ${_selectedItemIds.length} data scan terpilih dari riwayat?'),
+        actions: [
+          TextButton(onPressed: () => Navigator.pop(ctx), child: const Text('Batal')),
+          TextButton(
+            onPressed: () {
+              for (final id in _selectedItemIds) {
+                provider.removeItem(id);
+              }
+              setState(() {
+                _isSelectionMode = false;
+                _selectedItemIds.clear();
+              });
               Navigator.pop(ctx);
             },
             child: const Text('Hapus', style: TextStyle(color: Colors.red, fontWeight: FontWeight.bold)),
@@ -481,6 +663,164 @@ class HomePage extends StatelessWidget {
         ],
       ),
     );
+  }
+
+  Widget _buildSendBar(BuildContext context, ScanProvider provider) {
+    final isSending = provider.state == ProviderState.sending;
+    final isDone = provider.state == ProviderState.done;
+    final selectedSuccessItems = provider.items
+        .where((t) => _selectedItemIds.contains(t.id) && t.status == ScanStatus.success)
+        .toList();
+
+    return Container(
+      padding: EdgeInsets.only(
+        left: 16,
+        right: 16,
+        top: 16,
+        bottom: MediaQuery.of(context).padding.bottom + 16,
+      ),
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
+        border: Border(top: BorderSide(color: const Color(0xFFBEC9C2).withOpacity(0.3))),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.06),
+            blurRadius: 16,
+            offset: const Offset(0, -4),
+          ),
+        ],
+      ),
+      child: SafeArea(
+        top: false,
+        child: isDone
+            ? _buildDoneBanner(context, provider)
+            : Column(
+                mainAxisSize: MainAxisSize.min,
+                children: [
+                  if (provider.errorMessage != null)
+                    Container(
+                      margin: const EdgeInsets.only(bottom: 12),
+                      padding: const EdgeInsets.all(12),
+                      decoration: BoxDecoration(
+                        color: const Color(0xFFFFDAD6),
+                        borderRadius: BorderRadius.circular(8),
+                        border: Border.all(color: const Color(0xFFBA1A1A).withOpacity(0.3)),
+                      ),
+                      child: Row(
+                        children: [
+                          const Icon(Icons.error_outline_rounded, color: Color(0xFFBA1A1A), size: 16),
+                          const SizedBox(width: 8),
+                          Expanded(
+                            child: Text(
+                              provider.errorMessage!,
+                              style: const TextStyle(color: Color(0xFFBA1A1A), fontSize: 13, fontFamily: 'Inter'),
+                            ),
+                          ),
+                        ],
+                      ),
+                    ),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 52,
+                    child: ElevatedButton.icon(
+                      onPressed: (isSending || selectedSuccessItems.isEmpty) 
+                          ? null 
+                          : () => _sendToSheets(context, provider, selectedSuccessItems),
+                      style: ElevatedButton.styleFrom(
+                        backgroundColor: _uinGreen,
+                        foregroundColor: Colors.white,
+                        disabledBackgroundColor: _uinGreen.withOpacity(0.8),
+                        disabledForegroundColor: Colors.white,
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                        elevation: 4,
+                        shadowColor: _uinGreen.withOpacity(0.3),
+                      ),
+                      icon: isSending
+                          ? const SizedBox(
+                              width: 20,
+                              height: 20,
+                              child: CircularProgressIndicator(
+                                strokeWidth: 3,
+                                valueColor: AlwaysStoppedAnimation<Color>(Colors.white),
+                              ),
+                            )
+                          : const Icon(Icons.cloud_upload_rounded),
+                      label: Text(
+                        isSending ? 'Mengirim ke Google Sheets…' : 'Kirim ${selectedSuccessItems.length} Data ke Sheets',
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                      ),
+                    ),
+                  ),
+                  const SizedBox(height: 12),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 50,
+                    child: OutlinedButton.icon(
+                      onPressed: isSending ? null : () => _showBatchDeleteDialog(context, provider),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: const Color(0xFFBA1A1A),
+                        side: const BorderSide(color: Color(0xFFBA1A1A), width: 1.5),
+                        shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
+                      ),
+                      icon: const Icon(Icons.delete_sweep_rounded, size: 20),
+                      label: const Text(
+                        'Hapus Terpilih',
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+      ),
+    );
+  }
+
+  Widget _buildDoneBanner(BuildContext context, ScanProvider provider) {
+    return Container(
+      padding: const EdgeInsets.all(16),
+      decoration: BoxDecoration(
+        color: const Color(0xFFF0FDF4),
+        borderRadius: BorderRadius.circular(12),
+        border: Border.all(color: const Color(0xFF0E9F6E).withOpacity(0.3)),
+      ),
+      child: Row(
+        children: [
+          const Icon(Icons.check_circle_rounded, color: Color(0xFF0E9F6E), size: 28),
+          const SizedBox(width: 12),
+          const Expanded(
+            child: Text(
+              'Data berhasil dikirim ke Google Sheets!',
+              style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0E9F6E), fontFamily: 'Inter'),
+            ),
+          ),
+          TextButton(
+            onPressed: () {
+              provider.resetState();
+              setState(() {
+                _isSelectionMode = false;
+                _selectedItemIds.clear();
+              });
+            },
+            child: const Text('Selesai', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, color: _uinGreen)),
+          ),
+        ],
+      ),
+    );
+  }
+
+  Future<void> _sendToSheets(BuildContext context, ScanProvider provider, List<ThesisModel> selectedItems) async {
+    final success = await provider.sendToSheets(specificItems: selectedItems);
+    if (success) {
+      setState(() {
+        _isSelectionMode = false;
+        _selectedItemIds.clear();
+      });
+    } else if (context.mounted) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text(provider.errorMessage ?? 'Pengiriman gagal.'), backgroundColor: Colors.red),
+      );
+    }
   }
 }
 
@@ -491,6 +831,7 @@ class _StatCard extends StatelessWidget {
   final Color iconBgColor;
   final Color iconColor;
   final Color valueColor;
+  final double globalRadius; // Poin 2
 
   const _StatCard({
     required this.label,
@@ -499,137 +840,62 @@ class _StatCard extends StatelessWidget {
     required this.iconBgColor,
     required this.iconColor,
     required this.valueColor,
+    required this.globalRadius,
   });
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
       child: Container(
-        padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+        // Poin 4: Padding atas/bawah simetris 16px untuk memastikan angka tepat di tengah vertikal
+        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
         decoration: BoxDecoration(
           color: Colors.white,
-          borderRadius: BorderRadius.circular(16),
-          border: Border.all(color: Colors.grey.shade200),
+          borderRadius: BorderRadius.circular(globalRadius), // Poin 2: Radius sinkron 16.0
+          border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
           boxShadow: [
             BoxShadow(
-              color: Colors.black.withOpacity(0.01),
-              blurRadius: 10,
+              color: Colors.black.withOpacity(0.04),
+              blurRadius: 12,
               offset: const Offset(0, 4),
             ),
           ],
         ),
         child: Column(
+          mainAxisAlignment: MainAxisAlignment.center, // Poin 4: Distribusi center secara vertikal
+          crossAxisAlignment: CrossAxisAlignment.center,
           children: [
             Container(
-              width: 38,
-              height: 38,
+              width: 40,
+              height: 40,
               decoration: BoxDecoration(
                 color: iconBgColor,
                 shape: BoxShape.circle,
               ),
-              child: Icon(icon, color: iconColor, size: 18),
+              child: Icon(icon, color: iconColor, size: 20),
             ),
             const SizedBox(height: 10),
             Text(
               label,
-              style: TextStyle(
-                fontSize: 9,
-                fontWeight: FontWeight.w800,
-                color: Colors.grey.shade500,
+              textAlign: TextAlign.center,
+              style: const TextStyle(
+                fontSize: 10,
+                fontWeight: FontWeight.bold,
+                color: Color(0xFF6F7973),
                 letterSpacing: 0.5,
                 fontFamily: 'Inter',
               ),
             ),
-            const SizedBox(height: 4),
+            const SizedBox(height: 6),
             Text(
               value,
               style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.w800,
+                fontSize: 20, // Sedikit ditingkatkan nilainya agar lebih pop-out
+                fontWeight: FontWeight.bold,
                 color: valueColor,
                 fontFamily: 'Inter',
               ),
             ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _ActionCard extends StatelessWidget {
-  final String title;
-  final String subtitle;
-  final IconData icon;
-  final List<Color> gradient;
-  final VoidCallback onTap;
-
-  const _ActionCard({
-    required this.title,
-    required this.subtitle,
-    required this.icon,
-    required this.gradient,
-    required this.onTap,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return GestureDetector(
-      onTap: onTap,
-      child: Container(
-        padding: const EdgeInsets.all(20),
-        decoration: BoxDecoration(
-          gradient: LinearGradient(
-            colors: gradient,
-            begin: Alignment.topLeft,
-            end: Alignment.bottomRight,
-          ),
-          borderRadius: BorderRadius.circular(16),
-          boxShadow: [
-            BoxShadow(
-              color: gradient.first.withOpacity(0.22),
-              blurRadius: 14,
-              offset: const Offset(0, 6),
-            ),
-          ],
-        ),
-        child: Row(
-          children: [
-            Container(
-              padding: const EdgeInsets.all(12),
-              decoration: BoxDecoration(
-                color: Colors.white.withOpacity(0.2),
-                borderRadius: BorderRadius.circular(12),
-              ),
-              child: Icon(icon, color: Colors.white, size: 26),
-            ),
-            const SizedBox(width: 16),
-            Expanded(
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Text(
-                    title,
-                    style: const TextStyle(
-                      color: Colors.white,
-                      fontSize: 16,
-                      fontWeight: FontWeight.w800,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                  const SizedBox(height: 2),
-                  Text(
-                    subtitle,
-                    style: TextStyle(
-                      color: Colors.white.withOpacity(0.85),
-                      fontSize: 13,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ],
-              ),
-            ),
-            Icon(Icons.chevron_right_rounded, color: Colors.white.withOpacity(0.8), size: 24),
           ],
         ),
       ),

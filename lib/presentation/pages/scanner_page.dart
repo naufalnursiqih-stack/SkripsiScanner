@@ -10,6 +10,8 @@ import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import '../../core/constants/app_constants.dart';
 import '../providers/scan_provider.dart';
 import 'review_page.dart';
+import 'edit_page.dart';
+import 'dashboard_shell.dart';
 
 class ScannerPage extends StatefulWidget {
   final bool fromCamera;
@@ -279,10 +281,28 @@ class _ScannerPageState extends State<ScannerPage>
     await provider.scanImages(_selectedPaths);
 
     if (mounted) {
-      Navigator.pushReplacement(
-        context,
-        MaterialPageRoute(builder: (_) => const ReviewPage()),
-      );
+      if (_selectedPaths.length == 1) {
+        // Mode single: langsung arahkan ke EditPage untuk item ini
+        final newlyScannedItem = provider.items.last;
+        Navigator.pushReplacement(
+          context,
+          MaterialPageRoute(
+            builder: (_) => EditPage(
+              thesis: newlyScannedItem,
+              fromScanner: true,
+            ),
+          ),
+        );
+      } else {
+        // Mode batch/multi: setelah selesai scan batch, kita kembali ke Dashboard tab Review
+        Navigator.pushAndRemoveUntil(
+          context,
+          MaterialPageRoute(
+            builder: (_) => const DashboardShell(initialIndex: 1),
+          ),
+          (route) => false,
+        );
+      }
     }
   }
 

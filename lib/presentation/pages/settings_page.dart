@@ -69,8 +69,15 @@ class _SettingsPageState extends State<SettingsPage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
+      backgroundColor: const Color(0xFF1E5E3A),
       appBar: AppBar(
-        title: const Text('Pengaturan'),
+        backgroundColor: const Color(0xFF1E5E3A),
+        scrolledUnderElevation: 0,
+        title: const Text(
+          'Pengaturan',
+          style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold),
+        ),
+        iconTheme: const IconThemeData(color: Colors.white),
         elevation: 0,
       ),
       body: _isLoading
@@ -91,30 +98,74 @@ class _SettingsPageState extends State<SettingsPage> {
                     const SizedBox(height: 16),
                     
                     // Kolom input teks untuk URL
-                    TextFormField(
-                      controller: _urlController,
-                      maxLines: 3,
-                      keyboardType: TextInputType.url,
-                      decoration: const InputDecoration(
-                        labelText: 'Google Apps Script Web App URL',
-                        hintText: 'https://script.google.com/macros/s/.../exec',
-                        alignLabelWithHint: true,
+                    Container(
+                      padding: const EdgeInsets.all(20),
+                      decoration: BoxDecoration(
+                        color: Colors.white,
+                        borderRadius: BorderRadius.circular(16),
+                        border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
+                        boxShadow: [
+                          BoxShadow(
+                            color: Colors.black.withOpacity(0.02),
+                            blurRadius: 10,
+                            offset: const Offset(0, 4),
+                          ),
+                        ],
                       ),
-                      validator: (value) {
-                        if (value == null || value.trim().isEmpty) {
-                          return 'URL tidak boleh kosong';
-                        }
-                        final trimmed = value.trim();
-                        if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
-                          return 'Format URL harus dimulai dengan http:// atau https://';
-                        }
-                        if (!trimmed.contains('script.google.com')) {
-                          return 'Pastikan ini adalah URL Google Apps Script yang valid';
-                        }
-                        return null;
-                      },
+                      child: TextFormField(
+                        controller: _urlController,
+                        maxLines: 3,
+                        keyboardType: TextInputType.url,
+                        style: const TextStyle(
+                          color: Color(0xFF191C1E),
+                          fontSize: 15,
+                          fontFamily: 'Inter',
+                        ),
+                        cursorColor: const Color(0xFF1E5E3A),
+                        decoration: InputDecoration(
+                          labelText: 'Google Apps Script Web App URL',
+                          labelStyle: const TextStyle(
+                            color: Color(0xFF3F4944),
+                            fontWeight: FontWeight.w600,
+                            fontSize: 13,
+                          ),
+                          hintText: 'https://script.google.com/macros/s/.../exec',
+                          hintStyle: const TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
+                          alignLabelWithHint: true,
+                          enabledBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: BorderSide(color: const Color(0xFFBEC9C2).withOpacity(0.5)),
+                          ),
+                          focusedBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFF1E5E3A), width: 1.5),
+                          ),
+                          errorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFBA1A1A)),
+                          ),
+                          focusedErrorBorder: OutlineInputBorder(
+                            borderRadius: BorderRadius.circular(8),
+                            borderSide: const BorderSide(color: Color(0xFFBA1A1A), width: 1.5),
+                          ),
+                          contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
+                        ),
+                        validator: (value) {
+                          if (value == null || value.trim().isEmpty) {
+                            return 'URL tidak boleh kosong';
+                          }
+                          final trimmed = value.trim();
+                          if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
+                            return 'Format URL harus dimulai dengan http:// atau https://';
+                          }
+                          if (!trimmed.contains('script.google.com')) {
+                            return 'Pastikan ini adalah URL Google Apps Script yang valid';
+                          }
+                          return null;
+                        },
+                      ),
                     ),
-                    const SizedBox(height: 16),
+                    const SizedBox(height: 20),
                     
                     // Tombol: Simpan & Bersihkan
                     Row(
@@ -122,16 +173,33 @@ class _SettingsPageState extends State<SettingsPage> {
                         Expanded(
                           child: OutlinedButton.icon(
                             onPressed: _clearUrl,
-                            icon: const Icon(Icons.clear_rounded, size: 18),
-                            label: const Text('Kosongkan'),
+                            icon: const Icon(Icons.clear_rounded, size: 18, color: Colors.white),
+                            label: const Text('Kosongkan', style: TextStyle(color: Colors.white, fontWeight: FontWeight.bold)),
+                            style: OutlinedButton.styleFrom(
+                              foregroundColor: Colors.white,
+                              side: const BorderSide(color: Colors.white54, width: 1.5),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                            ),
                           ),
                         ),
                         const SizedBox(width: 12),
                         Expanded(
                           child: ElevatedButton.icon(
                             onPressed: _saveUrl,
-                            icon: const Icon(Icons.save_rounded, size: 18),
-                            label: const Text('Simpan'),
+                            icon: const Icon(Icons.save_rounded, size: 18, color: Color(0xFF271900)),
+                            label: const Text('Simpan', style: TextStyle(color: Color(0xFF271900), fontWeight: FontWeight.bold)),
+                            style: ElevatedButton.styleFrom(
+                              backgroundColor: const Color(0xFFFCBF48), // Gold
+                              foregroundColor: const Color(0xFF271900),
+                              shape: RoundedRectangleBorder(
+                                borderRadius: BorderRadius.circular(12),
+                              ),
+                              padding: const EdgeInsets.symmetric(vertical: 14),
+                              elevation: 2,
+                            ),
                           ),
                         ),
                       ],
@@ -158,14 +226,14 @@ class _SettingsPageState extends State<SettingsPage> {
   Widget _buildSectionHeader(BuildContext context, {required String title, required IconData icon}) {
     return Row(
       children: [
-        Icon(icon, color: Theme.of(context).colorScheme.primary, size: 22),
+        Icon(icon, color: const Color(0xFFFCBF48), size: 22),
         const SizedBox(width: 8),
         Text(
           title,
-          style: TextStyle(
+          style: const TextStyle(
             fontSize: 16,
             fontWeight: FontWeight.bold,
-            color: Theme.of(context).colorScheme.primary,
+            color: Colors.white,
           ),
         ),
       ],
@@ -179,7 +247,7 @@ class _SettingsPageState extends State<SettingsPage> {
       decoration: BoxDecoration(
         color: Colors.white,
         borderRadius: BorderRadius.circular(16),
-        border: Border.all(color: Colors.grey.shade200),
+        border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
         boxShadow: [
           BoxShadow(
             color: Colors.black.withOpacity(0.02),
@@ -223,11 +291,11 @@ class _SettingsPageState extends State<SettingsPage> {
       children: [
         CircleAvatar(
           radius: 16,
-          backgroundColor: Theme.of(context).colorScheme.primary.withOpacity(0.1),
-          child: Icon(
+          backgroundColor: const Color(0xFF1E5E3A).withOpacity(0.1),
+          child: const Icon(
             Icons.person_rounded,
             size: 16,
-            color: Theme.of(context).colorScheme.primary,
+            color: Color(0xFF1E5E3A),
           ),
         ),
         const SizedBox(width: 12),

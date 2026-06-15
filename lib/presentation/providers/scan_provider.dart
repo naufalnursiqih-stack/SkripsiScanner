@@ -114,11 +114,17 @@ class ScanProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void resetState() {
+    _state = ProviderState.idle;
+    _errorMessage = null;
+    notifyListeners();
+  }
+
   // ─── Pengiriman Data ──────────────────────────────────────────────────────────
 
   /// Mengirim semua data yang berhasil dipindai ke Google Sheets dalam satu kelompok (batch).
-  Future<bool> sendToSheets() async {
-    final toSend = successItems;
+  Future<bool> sendToSheets({List<ThesisModel>? specificItems}) async {
+    final toSend = specificItems ?? successItems;
     if (toSend.isEmpty) return false;
 
     _state = ProviderState.sending;

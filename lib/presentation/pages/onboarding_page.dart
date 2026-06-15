@@ -62,226 +62,236 @@ class _OnboardingPageState extends State<OnboardingPage> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF004625); // Deep Green
+    const primaryColor = Color(0xFF1E5E3A); // Splash/Green theme color
     const secondaryColor = Color(0xFFFCBF48); // Gold
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF7),
-      body: SafeArea(
-        child: Column(
-          children: [
-            // Bagian Atas Halaman
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
-              child: Row(
-                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                children: [
-                  const Text(
-                    'SkripsiScan',
-                    style: TextStyle(
-                      fontSize: 20,
-                      fontWeight: FontWeight.w700,
-                      color: primaryColor,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                  if (_currentIndex < _slides.length - 1)
-                    TextButton(
-                      onPressed: _onSkip,
-                      style: TextButton.styleFrom(
-                        foregroundColor: const Color(0xFF707971),
-                        padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
-                      ),
-                      child: const Text(
-                        'Lewati',
+      backgroundColor: primaryColor,
+      body: Stack(
+        children: [
+          // Background Dot Grid Texture
+          Positioned.fill(
+            child: CustomPaint(
+              painter: _DotGridPainter(),
+            ),
+          ),
+          SafeArea(
+            child: Column(
+              children: [
+                // Bagian Atas Halaman
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 10),
+                  child: Row(
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      const Text(
+                        'SkripsiScan',
                         style: TextStyle(
-                          fontSize: 14,
+                          fontSize: 20,
+                          fontWeight: FontWeight.w700,
+                          color: Colors.white,
+                          fontFamily: 'Inter',
+                        ),
+                      ),
+                      if (_currentIndex < _slides.length - 1)
+                        TextButton(
+                          onPressed: _onSkip,
+                          style: TextButton.styleFrom(
+                            foregroundColor: Colors.white.withOpacity(0.8),
+                            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 8),
+                          ),
+                          child: const Text(
+                            'Lewati',
+                            style: TextStyle(
+                              fontSize: 14,
+                              fontWeight: FontWeight.w600,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                        )
+                      else
+                        const SizedBox(width: 48, height: 36), // Balanced spacing
+                    ],
+                  ),
+                ),
+
+                // Tampilan Geser Onboarding
+                Expanded(
+                  child: PageView.builder(
+                    controller: _pageController,
+                    itemCount: _slides.length,
+                    onPageChanged: (index) {
+                      setState(() {
+                        _currentIndex = index;
+                      });
+                    },
+                    itemBuilder: (context, index) {
+                      final slide = _slides[index];
+                      return Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          children: [
+                            // Kontainer Gambar
+                            Expanded(
+                              child: Center(
+                                child: AspectRatio(
+                                  aspectRatio: 1.0,
+                                  child: Container(
+                                    decoration: BoxDecoration(
+                                      color: Colors.white,
+                                      borderRadius: BorderRadius.circular(16),
+                                      border: Border.all(color: const Color(0xFFC0C9BF).withOpacity(0.3)),
+                                      boxShadow: [
+                                        BoxShadow(
+                                          color: Colors.black.withOpacity(0.12),
+                                          blurRadius: 24,
+                                          offset: const Offset(0, 8),
+                                        ),
+                                      ],
+                                    ),
+                                    padding: const EdgeInsets.all(16),
+                                    child: Stack(
+                                      alignment: Alignment.center,
+                                      children: [
+                                        // Gambar Ilustrasi Utama
+                                        ClipRRect(
+                                          borderRadius: BorderRadius.circular(12),
+                                          child: Image.asset(
+                                            slide.imageUrl,
+                                            fit: BoxFit.contain,
+                                            errorBuilder: (context, error, stackTrace) {
+                                              return Container(
+                                                color: Colors.grey.shade100,
+                                                child: const Icon(
+                                                  Icons.image_rounded,
+                                                  size: 64,
+                                                  color: Colors.grey,
+                                                ),
+                                              );
+                                            },
+                                          ),
+                                        ),
+
+                                        // Overlay animasi pemindai dekoratif untuk Langkah 1
+                                        if (slide.hasScanningOverlay)
+                                          const _ScanningOverlay(),
+                                      ],
+                                    ),
+                                  ),
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 24),
+
+                            // Teks Judul & Subjudul
+                            Text(
+                              slide.title,
+                              style: const TextStyle(
+                                fontSize: 26,
+                                fontWeight: FontWeight.w700,
+                                color: Colors.white,
+                                letterSpacing: -0.5,
+                                fontFamily: 'Inter',
+                              ),
+                            ),
+                            const SizedBox(height: 12),
+                            Padding(
+                              padding: const EdgeInsets.symmetric(horizontal: 12),
+                              child: Text(
+                                slide.description,
+                                textAlign: TextAlign.center,
+                                style: TextStyle(
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w400,
+                                  color: Colors.white.withOpacity(0.85),
+                                  height: 1.5,
+                                  fontFamily: 'Inter',
+                                ),
+                              ),
+                            ),
+                            const SizedBox(height: 20),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+
+                // Indikator Halaman & Aksi
+                Padding(
+                  padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
+                  child: Column(
+                    children: [
+                      // Titik Indikator Halaman
+                      Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: List.generate(_slides.length, (index) {
+                          final isActive = index == _currentIndex;
+                          return AnimatedContainer(
+                            duration: const Duration(milliseconds: 300),
+                            margin: const EdgeInsets.symmetric(horizontal: 4),
+                            width: isActive ? 28 : 8,
+                            height: 8,
+                            decoration: BoxDecoration(
+                              color: isActive ? secondaryColor : Colors.white.withOpacity(0.3),
+                              borderRadius: BorderRadius.circular(4),
+                            ),
+                          );
+                        }),
+                      ),
+                      const SizedBox(height: 24),
+
+                      // Tombol Aksi
+                      SizedBox(
+                        width: double.infinity,
+                        height: 56,
+                        child: ElevatedButton(
+                          onPressed: _onNext,
+                          style: ElevatedButton.styleFrom(
+                            backgroundColor: secondaryColor,
+                            foregroundColor: const Color(0xFF271900),
+                            elevation: 1,
+                            shape: RoundedRectangleBorder(
+                              borderRadius: BorderRadius.circular(16),
+                            ),
+                            textStyle: const TextStyle(
+                              fontSize: 15,
+                              fontWeight: FontWeight.w700,
+                              fontFamily: 'Inter',
+                            ),
+                          ),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(_currentIndex == _slides.length - 1
+                                  ? 'Mulai Sekarang'
+                                  : 'Selanjutnya'),
+                              const SizedBox(width: 8),
+                              const Icon(Icons.arrow_forward_rounded, size: 18),
+                            ],
+                          ),
+                        ),
+                      ),
+                      const SizedBox(height: 12),
+                      
+                      // Keterangan Langkah
+                      Text(
+                        'Langkah ${_currentIndex + 1} dari ${_slides.length}',
+                        style: TextStyle(
+                          fontSize: 12,
+                          color: Colors.white.withOpacity(0.6),
                           fontWeight: FontWeight.w600,
                           fontFamily: 'Inter',
                         ),
                       ),
-                    )
-                  else
-                    const SizedBox(width: 48, height: 36), // Balanced spacing
-                ],
-              ),
-            ),
-
-            // Tampilan Geser Onboarding
-            Expanded(
-              child: PageView.builder(
-                controller: _pageController,
-                itemCount: _slides.length,
-                onPageChanged: (index) {
-                  setState(() {
-                    _currentIndex = index;
-                  });
-                },
-                itemBuilder: (context, index) {
-                  final slide = _slides[index];
-                  return Padding(
-                    padding: const EdgeInsets.symmetric(horizontal: 20),
-                    child: Column(
-                      mainAxisAlignment: MainAxisAlignment.center,
-                      children: [
-                        // Kontainer Gambar
-                        Expanded(
-                          child: Center(
-                            child: AspectRatio(
-                              aspectRatio: 1.0,
-                              child: Container(
-                                decoration: BoxDecoration(
-                                  color: Colors.white,
-                                  borderRadius: BorderRadius.circular(16),
-                                  border: Border.all(color: const Color(0xFFC0C9BF).withOpacity(0.3)),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: primaryColor.withOpacity(0.04),
-                                      blurRadius: 24,
-                                      offset: const Offset(0, 8),
-                                    ),
-                                  ],
-                                ),
-                                padding: const EdgeInsets.all(16),
-                                child: Stack(
-                                  alignment: Alignment.center,
-                                  children: [
-                                    // Gambar Ilustrasi Utama
-                                    ClipRRect(
-                                      borderRadius: BorderRadius.circular(12),
-                                      child: Image.asset(
-                                        slide.imageUrl,
-                                        fit: BoxFit.contain,
-                                        errorBuilder: (context, error, stackTrace) {
-                                          return Container(
-                                            color: Colors.grey.shade100,
-                                            child: const Icon(
-                                              Icons.image_rounded,
-                                              size: 64,
-                                              color: Colors.grey,
-                                            ),
-                                          );
-                                        },
-                                      ),
-                                    ),
-
-                                    // Overlay animasi pemindai dekoratif untuk Langkah 1
-                                    if (slide.hasScanningOverlay)
-                                      const _ScanningOverlay(),
-                                  ],
-                                ),
-                              ),
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 24),
-
-                        // Teks Judul & Subjudul
-                        Text(
-                          slide.title,
-                          style: const TextStyle(
-                            fontSize: 26,
-                            fontWeight: FontWeight.w700,
-                            color: primaryColor,
-                            letterSpacing: -0.5,
-                            fontFamily: 'Inter',
-                          ),
-                        ),
-                        const SizedBox(height: 12),
-                        Padding(
-                          padding: const EdgeInsets.symmetric(horizontal: 12),
-                          child: Text(
-                            slide.description,
-                            textAlign: TextAlign.center,
-                            style: const TextStyle(
-                              fontSize: 16,
-                              fontWeight: FontWeight.w400,
-                              color: Color(0xFF404941),
-                              height: 1.5,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ),
-                        const SizedBox(height: 20),
-                      ],
-                    ),
-                  );
-                },
-              ),
-            ),
-
-            // Indikator Halaman & Aksi
-            Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 24),
-              child: Column(
-                children: [
-                  // Titik Indikator Halaman
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.center,
-                    children: List.generate(_slides.length, (index) {
-                      final isActive = index == _currentIndex;
-                      return AnimatedContainer(
-                        duration: const Duration(milliseconds: 300),
-                        margin: const EdgeInsets.symmetric(horizontal: 4),
-                        width: isActive ? 28 : 8,
-                        height: 8,
-                        decoration: BoxDecoration(
-                          color: isActive ? secondaryColor : const Color(0xFFC0C9BF),
-                          borderRadius: BorderRadius.circular(4),
-                        ),
-                      );
-                    }),
+                    ],
                   ),
-                  const SizedBox(height: 24),
-
-                  // Tombol Aksi
-                  SizedBox(
-                    width: double.infinity,
-                    height: 56,
-                    child: ElevatedButton(
-                      onPressed: _onNext,
-                      style: ElevatedButton.styleFrom(
-                        backgroundColor: secondaryColor,
-                        foregroundColor: const Color(0xFF271900),
-                        elevation: 1,
-                        shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(16),
-                        ),
-                        textStyle: const TextStyle(
-                          fontSize: 15,
-                          fontWeight: FontWeight.w700,
-                          fontFamily: 'Inter',
-                        ),
-                      ),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.center,
-                        children: [
-                          Text(_currentIndex == _slides.length - 1
-                              ? 'Mulai Sekarang'
-                              : 'Selanjutnya'),
-                          const SizedBox(width: 8),
-                          const Icon(Icons.arrow_forward_rounded, size: 18),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  
-                  // Keterangan Langkah
-                  Text(
-                    'Langkah ${_currentIndex + 1} dari ${_slides.length}',
-                    style: const TextStyle(
-                      fontSize: 12,
-                      color: Color(0xFF707971),
-                      fontWeight: FontWeight.w600,
-                      fontFamily: 'Inter',
-                    ),
-                  ),
-                ],
-              ),
+                ),
+              ],
             ),
-          ],
-        ),
+          ),
+        ],
       ),
     );
   }
@@ -434,3 +444,23 @@ class _CornerBorder extends StatelessWidget {
     );
   }
 }
+
+class _DotGridPainter extends CustomPainter {
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = Colors.white.withOpacity(0.06)
+      ..style = PaintingStyle.fill;
+      
+    const double spacing = 24.0;
+    for (double x = spacing / 2; x < size.width; x += spacing) {
+      for (double y = spacing / 2; y < size.height; y += spacing) {
+        canvas.drawCircle(Offset(x, y), 0.75, paint);
+      }
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
+}
+

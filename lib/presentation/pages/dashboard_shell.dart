@@ -8,14 +8,21 @@ import 'review_page.dart';
 import 'settings_page.dart';
 
 class DashboardShell extends StatefulWidget {
-  const DashboardShell({super.key});
+  final int initialIndex;
+  const DashboardShell({super.key, this.initialIndex = 0});
 
   @override
   State<DashboardShell> createState() => DashboardShellState();
 }
 
 class DashboardShellState extends State<DashboardShell> {
-  int _currentIndex = 0;
+  late int _currentIndex;
+
+  @override
+  void initState() {
+    super.initState();
+    _currentIndex = widget.initialIndex;
+  }
 
   final List<Widget> _pages = [
     const HomePage(),
@@ -31,8 +38,9 @@ class DashboardShellState extends State<DashboardShell> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF004625);
-    const goldColor = Color(0xFFFCBF48);
+    const primaryColor = Color(0xFF1E5E3A); // UIN Green for active tab
+    const goldColor = Color(0xFFFCBF48); // UIN Gold dot
+    const inactiveColor = Color(0xFF6F7973); // Dark grey for inactive tabs
 
     return Scaffold(
       body: IndexedStack(
@@ -41,15 +49,21 @@ class DashboardShellState extends State<DashboardShell> {
       ),
       bottomNavigationBar: Container(
         decoration: BoxDecoration(
-          color: Colors.white,
+          color: Colors.white, // Solid white background
           borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
           boxShadow: [
             BoxShadow(
-              color: const Color(0xFF004625).withOpacity(0.08),
+              color: const Color(0xFF004532).withOpacity(0.08),
               blurRadius: 12,
               offset: const Offset(0, -4),
             ),
           ],
+          border: Border(
+            top: BorderSide(
+              color: const Color(0xFFBEC9C2).withOpacity(0.3),
+              width: 1.0,
+            ),
+          ),
         ),
         child: SafeArea(
           child: Padding(
@@ -62,6 +76,7 @@ class DashboardShellState extends State<DashboardShell> {
                   icon: Icons.home_rounded,
                   label: 'Beranda',
                   activeColor: primaryColor,
+                  inactiveColor: inactiveColor,
                   goldColor: goldColor,
                 ),
                 _buildNavItem(
@@ -69,6 +84,7 @@ class DashboardShellState extends State<DashboardShell> {
                   icon: Icons.document_scanner_rounded,
                   label: 'Review',
                   activeColor: primaryColor,
+                  inactiveColor: inactiveColor,
                   goldColor: goldColor,
                   showBadge: true,
                 ),
@@ -77,6 +93,7 @@ class DashboardShellState extends State<DashboardShell> {
                   icon: Icons.settings_rounded,
                   label: 'Pengaturan',
                   activeColor: primaryColor,
+                  inactiveColor: inactiveColor,
                   goldColor: goldColor,
                 ),
               ],
@@ -92,6 +109,7 @@ class DashboardShellState extends State<DashboardShell> {
     required IconData icon,
     required String label,
     required Color activeColor,
+    required Color inactiveColor,
     required Color goldColor,
     bool showBadge = false,
   }) {
@@ -110,7 +128,7 @@ class DashboardShellState extends State<DashboardShell> {
               children: [
                 Icon(
                   icon,
-                  color: isActive ? activeColor : const Color(0xFF707971),
+                  color: isActive ? activeColor : inactiveColor,
                   size: 24,
                 ),
                 if (showBadge)
@@ -121,20 +139,21 @@ class DashboardShellState extends State<DashboardShell> {
                         top: -4,
                         right: -6,
                         child: Container(
-                          padding: const EdgeInsets.all(4),
-                          decoration: const BoxDecoration(
-                            color: Colors.red,
+                          padding: const EdgeInsets.all(2),
+                          decoration: BoxDecoration(
+                            color: const Color(0xFFBA1A1A),
                             shape: BoxShape.circle,
+                            border: Border.all(color: Colors.white, width: 1.0),
                           ),
                           constraints: const BoxConstraints(
-                            minWidth: 14,
-                            minHeight: 14,
+                            minWidth: 16,
+                            minHeight: 16,
                           ),
                           child: Text(
                             '${provider.items.length}',
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 8,
+                              fontSize: 9,
                               fontWeight: FontWeight.bold,
                             ),
                             textAlign: TextAlign.center,
@@ -149,7 +168,7 @@ class DashboardShellState extends State<DashboardShell> {
             Text(
               label,
               style: TextStyle(
-                color: isActive ? activeColor : const Color(0xFF707971),
+                color: isActive ? activeColor : inactiveColor,
                 fontSize: 12,
                 fontWeight: isActive ? FontWeight.bold : FontWeight.w500,
                 fontFamily: 'Inter',

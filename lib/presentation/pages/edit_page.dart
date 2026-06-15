@@ -7,11 +7,18 @@ import 'package:provider/provider.dart';
 import '../../data/models/thesis_model.dart';
 import '../../data/services/api_service.dart';
 import '../providers/scan_provider.dart';
+import 'scanner_page.dart';
+import 'dashboard_shell.dart';
 
 class EditPage extends StatefulWidget {
   final ThesisModel thesis;
+  final bool fromScanner;
 
-  const EditPage({super.key, required this.thesis});
+  const EditPage({
+    super.key,
+    required this.thesis,
+    this.fromScanner = false,
+  });
 
   @override
   State<EditPage> createState() => _EditPageState();
@@ -21,6 +28,7 @@ class _EditPageState extends State<EditPage> {
   late TextEditingController _titleController;
   late TextEditingController _nameController;
   late TextEditingController _nimController;
+  late TextEditingController _majorController;
   late TextEditingController _yearController;
   late TextEditingController _advisorController;
 
@@ -29,7 +37,6 @@ class _EditPageState extends State<EditPage> {
 
   bool _isSaving = false;
   bool _isSavedSuccess = false;
-  bool _showToast = false;
 
   @override
   void initState() {
@@ -37,6 +44,7 @@ class _EditPageState extends State<EditPage> {
     _titleController = TextEditingController(text: widget.thesis.title);
     _nameController = TextEditingController(text: widget.thesis.name);
     _nimController = TextEditingController(text: widget.thesis.nim);
+    _majorController = TextEditingController(text: widget.thesis.major);
     _yearController = TextEditingController(text: widget.thesis.year);
     _advisorController = TextEditingController(text: widget.thesis.advisor);
 
@@ -54,6 +62,7 @@ class _EditPageState extends State<EditPage> {
     _titleController.dispose();
     _nameController.dispose();
     _nimController.dispose();
+    _majorController.dispose();
     _yearController.dispose();
     _advisorController.dispose();
     _scrollController.dispose();
@@ -72,6 +81,7 @@ class _EditPageState extends State<EditPage> {
       title: _titleController.text.trim(),
       name: _nameController.text.trim(),
       nim: _nimController.text.trim(),
+      major: _majorController.text.trim(),
       year: _yearController.text.trim(),
       advisor: _advisorController.text.trim(),
       status: ScanStatus.success, // Ensure it is marked as successfully processed
@@ -90,22 +100,34 @@ class _EditPageState extends State<EditPage> {
       setState(() {
         _isSaving = false;
         _isSavedSuccess = true;
-        _showToast = true;
       });
 
-      // Hide toast and navigate back after 3 seconds
-      Future.delayed(const Duration(seconds: 3), () {
-        if (mounted) {
-          setState(() {
-            _showToast = false;
-          });
-          Future.delayed(const Duration(milliseconds: 300), () {
-            if (mounted) {
-              Navigator.pop(context);
-            }
-          });
-        }
-      });
+      // Tampilkan SnackBar sukses di halaman tujuan setelah pop
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(
+          content: Row(
+            children: const [
+              Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
+              SizedBox(width: 8),
+              Text(
+                'Berhasil Disimpan ke Google Sheets!',
+                style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+              ),
+            ],
+          ),
+          backgroundColor: const Color(0xFF137333),
+          behavior: SnackBarBehavior.floating,
+          duration: const Duration(seconds: 2),
+        ),
+      );
+
+      Navigator.pushAndRemoveUntil(
+        context,
+        MaterialPageRoute(
+          builder: (_) => const DashboardShell(initialIndex: 1),
+        ),
+        (route) => false,
+      );
     } else {
       setState(() {
         _isSaving = false;
@@ -123,35 +145,40 @@ class _EditPageState extends State<EditPage> {
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF004625);
-    const goldColor = Color(0xFFFCBF48);
+    const primaryColor = Color(0xFF004532);
+    const goldColor = Color(0xFF855300);
     const errorColor = Color(0xFFBA1A1A);
-    const surfaceDimColor = Color(0xFFECEEEB);
 
-    // Compute parallax image scale based on scroll offset
     double imageScale = 1.0 + (_scrollOffset.clamp(0.0, 300.0) / 1000.0);
 
     return Scaffold(
-      backgroundColor: const Color(0xFFF8FAF7),
+      backgroundColor: const Color(0xFF1E5E3A),
       appBar: AppBar(
-        backgroundColor: Colors.white,
+        backgroundColor: const Color(0xFF1E5E3A),
         elevation: 0,
-        scrolledUnderElevation: 1,
-        shadowColor: Colors.black.withOpacity(0.05),
+        scrolledUnderElevation: 0,
+        bottom: PreferredSize(
+          preferredSize: const Size.fromHeight(1),
+          child: Container(
+            color: const Color(0xFFBEC9C2).withOpacity(0.3),
+            height: 1,
+          ),
+        ),
         leading: IconButton(
-          icon: const Icon(Icons.arrow_back_rounded, color: primaryColor),
+          icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
         title: const Text(
           'SkripsiScan',
           style: TextStyle(
-            color: primaryColor,
+            color: Colors.white,
             fontWeight: FontWeight.bold,
-            fontSize: 20,
+            fontSize: 22,
             fontFamily: 'Inter',
           ),
         ),
-        centerTitle: true,
+        centerTitle: false,
+        titleSpacing: 0,
       ),
       body: Stack(
         children: [
@@ -174,10 +201,11 @@ class _EditPageState extends State<EditPage> {
                     decoration: BoxDecoration(
                       color: Colors.white,
                       borderRadius: BorderRadius.circular(12),
+                      border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
                       boxShadow: [
                         BoxShadow(
-                          color: primaryColor.withOpacity(0.06),
-                          blurRadius: 16,
+                          color: Colors.black.withOpacity(0.04),
+                          blurRadius: 12,
                           offset: const Offset(0, 4),
                         ),
                       ],
@@ -186,18 +214,12 @@ class _EditPageState extends State<EditPage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.stretch,
                       children: [
-                        // Academic gold accent border
-                        Container(
-                          height: 4,
-                          color: goldColor,
-                        ),
-                        // Image wrapper with square aspect ratio and parallax scale zoom
                         AspectRatio(
-                          aspectRatio: 1.0,
+                          aspectRatio: 3 / 4,
                           child: Container(
                             clipBehavior: Clip.antiAlias,
                             decoration: const BoxDecoration(
-                              color: Color(0xFFECEEEB),
+                              color: Color(0xFFECEEF0),
                             ),
                             child: Transform.scale(
                               scale: imageScale,
@@ -206,7 +228,7 @@ class _EditPageState extends State<EditPage> {
                                       child: Icon(
                                         Icons.image_rounded,
                                         size: 64,
-                                        color: Color(0xFF707971),
+                                        color: Color(0xFF6F7973),
                                       ),
                                     )
                                   : (widget.thesis.imagePath.isNotEmpty
@@ -218,7 +240,7 @@ class _EditPageState extends State<EditPage> {
                                               child: Icon(
                                                 Icons.broken_image_rounded,
                                                 size: 64,
-                                                color: Color(0xFF707971),
+                                                color: Color(0xFF6F7973),
                                               ),
                                             );
                                           },
@@ -227,19 +249,19 @@ class _EditPageState extends State<EditPage> {
                                           child: Icon(
                                             Icons.image_rounded,
                                             size: 64,
-                                            color: Color(0xFF707971),
+                                            color: Color(0xFF6F7973),
                                           ),
                                         )),
                             ),
                           ),
                         ),
-                        // Label bottom bar
-                        Padding(
-                          padding: const EdgeInsets.all(16),
+                        Container(
+                          padding: const EdgeInsets.all(12),
+                          color: const Color(0xFFFEA619).withOpacity(0.1),
                           child: Row(
                             children: const [
                               Icon(
-                                Icons.visibility_rounded,
+                                Icons.warning_amber_rounded,
                                 color: goldColor,
                                 size: 18,
                               ),
@@ -247,9 +269,9 @@ class _EditPageState extends State<EditPage> {
                               Text(
                                 'Referensi Gambar Asli',
                                 style: TextStyle(
-                                  color: Color(0xFF7D5800), // on-secondary-container-like gold
+                                  color: Color(0xFF684000), // on-secondary-container
                                   fontSize: 12,
-                                  fontWeight: FontWeight.w600,
+                                  fontWeight: FontWeight.bold,
                                   fontFamily: 'Inter',
                                 ),
                               ),
@@ -264,9 +286,9 @@ class _EditPageState extends State<EditPage> {
                   const Text(
                     'Review & Koreksi Data',
                     style: TextStyle(
-                      color: Color(0xFF191C1B),
-                      fontSize: 20,
-                      fontWeight: FontWeight.bold,
+                      color: Colors.white,
+                      fontSize: 18,
+                      fontWeight: FontWeight.w600,
                       fontFamily: 'Inter',
                     ),
                   ),
@@ -274,54 +296,92 @@ class _EditPageState extends State<EditPage> {
                   const Text(
                     'Pastikan data di bawah ini sesuai dengan dokumen fisik.',
                     style: TextStyle(
-                      color: Color(0xFF404941),
+                      color: Colors.white70,
                       fontSize: 14,
                       fontFamily: 'Inter',
                     ),
                   ),
-                  const SizedBox(height: 16),
+                  const SizedBox(height: 20),
 
                   // Form Inputs
                   Column(
                     children: [
                       _CustomFormCard(
                         label: 'Judul Skripsi',
-                        icon: Icons.description_rounded,
                         controller: _titleController,
                         maxLines: 3,
+                        placeholder: 'Judul skripsi tidak terdeteksi, ketuk untuk mengisi manual',
                       ),
                       const SizedBox(height: 16),
                       _CustomFormCard(
                         label: 'Nama Lengkap',
-                        icon: Icons.person_rounded,
                         controller: _nameController,
+                        placeholder: 'Nama tidak terdeteksi, ketuk untuk mengisi manual',
                       ),
                       const SizedBox(height: 16),
                       _CustomFormCard(
                         label: 'NIM',
-                        icon: Icons.badge_rounded,
                         controller: _nimController,
+                        placeholder: 'NIM tidak terdeteksi, ketuk untuk mengisi manual',
+                      ),
+                      const SizedBox(height: 16),
+                      _CustomFormCard(
+                        label: 'Program Studi',
+                        controller: _majorController,
+                        placeholder: 'Program studi tidak terdeteksi, ketuk untuk mengisi manual',
                       ),
                       const SizedBox(height: 16),
                       _CustomFormCard(
                         label: 'Tahun Kelulusan',
-                        icon: Icons.calendar_today_rounded,
                         controller: _yearController,
+                        placeholder: 'Tahun kelulusan tidak terdeteksi, ketuk untuk mengisi manual',
                       ),
                       const SizedBox(height: 16),
                       _CustomFormCard(
                         label: 'Dosen Pembimbing',
-                        icon: Icons.work_rounded,
                         controller: _advisorController,
+                        placeholder: 'Nama dosen tidak terdeteksi, ketuk untuk mengisi manual',
                       ),
                     ],
                   ),
                   const SizedBox(height: 24),
 
                   // Cancel / Re-take button
-                  Center(
-                    child: TextButton.icon(
-                      onPressed: () => Navigator.pop(context),
+                  SizedBox(
+                    width: double.infinity,
+                    height: 54,
+                    child: OutlinedButton.icon(
+                      onPressed: () {
+                        showDialog(
+                          context: context,
+                          builder: (ctx) => AlertDialog(
+                            title: const Text('Ambil Ulang Foto?', style: TextStyle(fontWeight: FontWeight.bold)),
+                            content: const Text('Data yang sedang diedit saat ini akan dihapus dan Anda akan diarahkan kembali ke kamera.'),
+                            actions: [
+                              TextButton(
+                                onPressed: () => Navigator.pop(ctx),
+                                child: const Text('Batal'),
+                              ),
+                              TextButton(
+                                onPressed: () {
+                                  Navigator.pop(ctx);
+                                  context.read<ScanProvider>().removeItem(widget.thesis.id);
+                                  Navigator.pushReplacement(
+                                    context,
+                                    MaterialPageRoute(
+                                      builder: (_) => const ScannerPage(fromCamera: true),
+                                    ),
+                                  );
+                                },
+                                child: const Text(
+                                  'Ambil Ulang',
+                                  style: TextStyle(color: Color(0xFFBA1A1A), fontWeight: FontWeight.bold),
+                                ),
+                              ),
+                            ],
+                          ),
+                        );
+                      },
                       icon: const Icon(
                         Icons.refresh_rounded,
                         color: errorColor,
@@ -332,17 +392,15 @@ class _EditPageState extends State<EditPage> {
                         style: TextStyle(
                           color: errorColor,
                           fontSize: 14,
-                          fontWeight: FontWeight.w600,
+                          fontWeight: FontWeight.bold,
                           fontFamily: 'Inter',
                         ),
                       ),
-                      style: TextButton.styleFrom(
-                        padding: const EdgeInsets.symmetric(
-                          horizontal: 16,
-                          vertical: 12,
-                        ),
+                      style: OutlinedButton.styleFrom(
+                        foregroundColor: errorColor,
+                        side: const BorderSide(color: errorColor, width: 2.0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(8),
+                          borderRadius: BorderRadius.circular(12),
                         ),
                       ),
                     ),
@@ -365,38 +423,37 @@ class _EditPageState extends State<EditPage> {
                 bottom: MediaQuery.of(context).padding.bottom + 16,
               ),
               decoration: BoxDecoration(
-                color: Colors.white,
+                color: const Color(0xFF133C25), // Match navigation bar background
                 borderRadius: const BorderRadius.vertical(top: Radius.circular(16)),
-                border: const Border(
+                border: Border(
                   top: BorderSide(
-                    color: Color(0xFFC0C9BF),
+                    color: Colors.white.withOpacity(0.1),
                     width: 1.0,
                   ),
                 ),
                 boxShadow: [
                   BoxShadow(
-                    color: Colors.black.withOpacity(0.05),
+                    color: Colors.black.withOpacity(0.2),
                     blurRadius: 10,
                     offset: const Offset(0, -4),
                   ),
                 ],
               ),
               child: SizedBox(
-                height: 56,
+                height: 54,
                 width: double.infinity,
                 child: ElevatedButton(
                   onPressed: (_isSaving || _isSavedSuccess) ? null : _handleSave,
                   style: ElevatedButton.styleFrom(
-                    backgroundColor: primaryColor,
-                    foregroundColor: Colors.white,
-                    disabledBackgroundColor: _isSavedSuccess
-                        ? primaryColor.withOpacity(0.8)
-                        : primaryColor.withOpacity(0.6),
-                    disabledForegroundColor: Colors.white,
+                    backgroundColor: const Color(0xFFFCBF48), // Gold for primary actions
+                    foregroundColor: const Color(0xFF271900), // Dark gold text
+                    disabledBackgroundColor: const Color(0xFFFCBF48).withOpacity(0.5),
+                    disabledForegroundColor: const Color(0xFF271900).withOpacity(0.5),
                     shape: RoundedRectangleBorder(
                       borderRadius: BorderRadius.circular(12),
                     ),
-                    elevation: 0,
+                    elevation: 4,
+                    shadowColor: const Color(0xFFFCBF48).withOpacity(0.3),
                   ),
                   child: _buildButtonContent(),
                 ),
@@ -404,76 +461,6 @@ class _EditPageState extends State<EditPage> {
             ),
           ),
 
-          // Floating Success Toast (Fade-in and Slide animation)
-          AnimatedPositioned(
-            duration: const Duration(milliseconds: 400),
-            curve: Curves.easeOutBack,
-            bottom: _showToast ? 108 : -100,
-            left: 20,
-            right: 20,
-            child: AnimatedOpacity(
-              duration: const Duration(milliseconds: 300),
-              opacity: _showToast ? 1.0 : 0.0,
-              child: Container(
-                padding: const EdgeInsets.all(16),
-                decoration: BoxDecoration(
-                  color: const Color(0xFFE6F4EA), // soft green
-                  borderRadius: BorderRadius.circular(12),
-                  border: Border.all(color: const Color(0xFFCEEAD6)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.1),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Row(
-                  children: [
-                    Container(
-                      padding: const EdgeInsets.all(4),
-                      decoration: const BoxDecoration(
-                        color: Color(0xFF137333),
-                        shape: BoxShape.circle,
-                      ),
-                      child: const Icon(
-                        Icons.check_rounded,
-                        color: Colors.white,
-                        size: 16,
-                      ),
-                    ),
-                    const SizedBox(width: 12),
-                    Expanded(
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisSize: MainAxisSize.min,
-                        children: const [
-                          Text(
-                            'Berhasil Disimpan!',
-                            style: TextStyle(
-                              color: Color(0xFF137333),
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                          SizedBox(height: 2),
-                          Text(
-                            'Data telah masuk ke Google Sheets.',
-                            style: TextStyle(
-                              color: Color(0xFF137333),
-                              fontSize: 12,
-                              fontFamily: 'Inter',
-                            ),
-                          ),
-                        ],
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
-          ),
         ],
       ),
     );
@@ -496,8 +483,8 @@ class _EditPageState extends State<EditPage> {
           Text(
             'Memproses...',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
               fontFamily: 'Inter',
             ),
           ),
@@ -509,13 +496,13 @@ class _EditPageState extends State<EditPage> {
       return Row(
         mainAxisAlignment: MainAxisAlignment.center,
         children: const [
-          Icon(Icons.check_circle_rounded, color: Colors.white, size: 24),
+          Icon(Icons.check_circle_rounded, color: Colors.white, size: 20),
           SizedBox(width: 8),
           Text(
             'Tersimpan',
             style: TextStyle(
-              fontSize: 16,
-              fontWeight: FontWeight.w600,
+              fontSize: 14,
+              fontWeight: FontWeight.bold,
               fontFamily: 'Inter',
             ),
           ),
@@ -531,8 +518,8 @@ class _EditPageState extends State<EditPage> {
         Text(
           'Simpan ke Spreadsheet',
           style: TextStyle(
-            fontSize: 16,
-            fontWeight: FontWeight.w600,
+            fontSize: 14,
+            fontWeight: FontWeight.bold,
             fontFamily: 'Inter',
           ),
         ),
@@ -541,18 +528,20 @@ class _EditPageState extends State<EditPage> {
   }
 }
 
-// Custom interactive field card with focus state listener
+// Custom interactive field card with focus state listener and validation state
 class _CustomFormCard extends StatefulWidget {
   final String label;
-  final IconData icon;
   final TextEditingController controller;
   final int maxLines;
+  final String placeholder;
+  final bool showWarningIfEmpty;
 
   const _CustomFormCard({
     required this.label,
-    required this.icon,
     required this.controller,
     this.maxLines = 1,
+    required this.placeholder,
+    this.showWarningIfEmpty = true,
   });
 
   @override
@@ -566,6 +555,7 @@ class _CustomFormCardState extends State<_CustomFormCard> {
   @override
   void initState() {
     super.initState();
+    widget.controller.addListener(_onTextChanged);
     _focusNode.addListener(() {
       if (mounted) {
         setState(() {
@@ -575,78 +565,104 @@ class _CustomFormCardState extends State<_CustomFormCard> {
     });
   }
 
+  void _onTextChanged() {
+    if (mounted) {
+      setState(() {});
+    }
+  }
+
   @override
   void dispose() {
+    widget.controller.removeListener(_onTextChanged);
     _focusNode.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
-    const primaryColor = Color(0xFF004625);
-    const outlineVariantColor = Color(0xFFC0C9BF);
+    const primaryColor = Color(0xFF1E5E3A); // Use consistent UIN Green for active focus border
+    const outlineColor = Color(0xFF6F7973);
+    const outlineVariantColor = Color(0xFFBEC9C2);
+    const errorColor = Color(0xFFBA1A1A);
+    const errorBgColor = Color(0xFFFFDAD6);
+
+    final isEmpty = widget.controller.text.isEmpty;
+    final showWarning = widget.showWarningIfEmpty && isEmpty;
 
     return AnimatedContainer(
       duration: const Duration(milliseconds: 200),
       decoration: BoxDecoration(
-        color: Colors.white,
+        color: showWarning ? errorBgColor.withOpacity(0.15) : Colors.white,
         borderRadius: BorderRadius.circular(12),
         border: Border.all(
-          color: _hasFocus ? primaryColor : outlineVariantColor,
+          color: showWarning
+              ? errorColor.withOpacity(0.2)
+              : (_hasFocus ? primaryColor : outlineVariantColor.withOpacity(0.3)),
           width: _hasFocus ? 1.5 : 1.0,
         ),
-        boxShadow: const [
+        boxShadow: [
           BoxShadow(
-            color: Color.fromRGBO(30, 94, 58, 0.03),
-            blurRadius: 10,
-            offset: Offset(0, 4),
+            color: Colors.black.withOpacity(0.04),
+            blurRadius: 12,
+            offset: const Offset(0, 4),
           ),
         ],
       ),
       padding: const EdgeInsets.all(16),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+      child: Row(
+        crossAxisAlignment: widget.maxLines > 1 ? CrossAxisAlignment.start : CrossAxisAlignment.center,
         children: [
-          Row(
-            children: [
-              Icon(
-                widget.icon,
-                size: 18,
-                color: _hasFocus ? primaryColor : const Color(0xFF404941),
-              ),
-              const SizedBox(width: 8),
-              Text(
-                widget.label,
-                style: TextStyle(
-                  fontSize: 12,
-                  fontWeight: FontWeight.w600,
-                  color: _hasFocus ? primaryColor : const Color(0xFF404941),
-                  fontFamily: 'Inter',
+          Expanded(
+            child: Column(
+              crossAxisAlignment: CrossAxisAlignment.start,
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Text(
+                  widget.label,
+                  style: const TextStyle(
+                    fontSize: 12,
+                    fontWeight: FontWeight.w600,
+                    color: Color(0xFF3F4944), // text-on-surface-variant
+                    fontFamily: 'Inter',
+                  ),
                 ),
-              ),
-            ],
+                const SizedBox(height: 6),
+                TextField(
+                  controller: widget.controller,
+                  focusNode: _focusNode,
+                  maxLines: widget.maxLines,
+                  style: TextStyle(
+                    fontSize: 16,
+                    color: showWarning ? errorColor : const Color(0xFF191C1E),
+                    fontFamily: 'Inter',
+                    fontWeight: widget.maxLines > 1 ? FontWeight.normal : FontWeight.w500,
+                    fontStyle: showWarning ? FontStyle.italic : FontStyle.normal,
+                  ),
+                  decoration: InputDecoration(
+                    isDense: true,
+                    contentPadding: EdgeInsets.zero,
+                    border: InputBorder.none,
+                    focusedBorder: InputBorder.none,
+                    enabledBorder: InputBorder.none,
+                    errorBorder: InputBorder.none,
+                    disabledBorder: InputBorder.none,
+                    filled: false,
+                    hintText: widget.placeholder,
+                    hintStyle: TextStyle(
+                      fontSize: 14,
+                      color: showWarning ? errorColor.withOpacity(0.6) : Colors.grey,
+                      fontStyle: FontStyle.italic,
+                    ),
+                  ),
+                ),
+              ],
+            ),
           ),
-          const SizedBox(height: 8),
-          TextField(
-            controller: widget.controller,
-            focusNode: _focusNode,
-            maxLines: widget.maxLines,
-            style: const TextStyle(
-              fontSize: 16,
-              color: Color(0xFF191C1B),
-              fontFamily: 'Inter',
-              fontWeight: FontWeight.w400,
-            ),
-            decoration: const InputDecoration(
-              isDense: true,
-              contentPadding: EdgeInsets.zero,
-              border: InputBorder.none,
-              focusedBorder: InputBorder.none,
-              enabledBorder: InputBorder.none,
-              errorBorder: InputBorder.none,
-              disabledBorder: InputBorder.none,
-              filled: false,
-            ),
+          const SizedBox(width: 8),
+          Icon(
+            Icons.edit_outlined,
+            size: 18,
+            color: _hasFocus ? primaryColor : outlineColor,
           ),
         ],
       ),
