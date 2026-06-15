@@ -6,6 +6,7 @@ import '../../data/models/thesis_model.dart';
 import '../providers/scan_provider.dart';
 import '../widgets/custom_button.dart';
 import '../widgets/thesis_card.dart';
+import 'edit_page.dart';
 
 class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
@@ -88,7 +89,10 @@ class _ReviewPageState extends State<ReviewPage>
               ),
               Text(
                 '${(provider.progress * 100).toStringAsFixed(0)}%',
-                style: const TextStyle(fontSize: 13, color: Color(0xFF1A56DB)),
+                style: TextStyle(
+                  fontSize: 13,
+                  color: Theme.of(context).colorScheme.primary,
+                ),
               ),
             ],
           ),
@@ -96,7 +100,7 @@ class _ReviewPageState extends State<ReviewPage>
           LinearProgressIndicator(
             value: provider.progress,
             backgroundColor: Colors.grey.shade200,
-            valueColor: const AlwaysStoppedAnimation(Color(0xFF1A56DB)),
+            valueColor: AlwaysStoppedAnimation(Theme.of(context).colorScheme.primary),
             borderRadius: BorderRadius.circular(4),
           ),
         ],
@@ -131,7 +135,14 @@ class _ReviewPageState extends State<ReviewPage>
         return ThesisCard(
           thesis: thesis,
           showImage: true,
-          onEdit: () => _showEditDialog(context, thesis, provider),
+          onEdit: () {
+            Navigator.push(
+              context,
+              MaterialPageRoute(
+                builder: (_) => EditPage(thesis: thesis),
+              ),
+            );
+          },
           onDelete: () => _confirmDelete(context, thesis.id, provider),
         );
       },
@@ -241,112 +252,6 @@ class _ReviewPageState extends State<ReviewPage>
 
   // ─── Dialogs ────────────────────────────────────────────────────────────────
 
-  void _showEditDialog(
-    BuildContext context,
-    ThesisModel thesis,
-    ScanProvider provider,
-  ) {
-    final titleCtrl = TextEditingController(text: thesis.title);
-    final nameCtrl = TextEditingController(text: thesis.name);
-    final nimCtrl = TextEditingController(text: thesis.nim);
-    final majorCtrl = TextEditingController(text: thesis.major);
-    final facultyCtrl = TextEditingController(text: thesis.faculty);
-    final yearCtrl = TextEditingController(text: thesis.year);
-
-    showModalBottomSheet(
-      context: context,
-      isScrollControlled: true,
-      backgroundColor: Colors.white,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(top: Radius.circular(20)),
-      ),
-      builder: (ctx) {
-        return DraggableScrollableSheet(
-          expand: false,
-          initialChildSize: 0.9,
-          builder: (_, scrollCtrl) {
-            return Padding(
-              padding: EdgeInsets.only(
-                left: 20,
-                right: 20,
-                top: 20,
-                bottom: MediaQuery.of(ctx).viewInsets.bottom + 20,
-              ),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  Row(
-                    children: [
-                      const Text(
-                        'Edit Data',
-                        style: TextStyle(
-                          fontSize: 18,
-                          fontWeight: FontWeight.w700,
-                        ),
-                      ),
-                      const Spacer(),
-                      IconButton(
-                        onPressed: () => Navigator.pop(ctx),
-                        icon: const Icon(Icons.close_rounded),
-                      ),
-                    ],
-                  ),
-                  const SizedBox(height: 16),
-                  Expanded(
-                    child: SingleChildScrollView(
-                      controller: scrollCtrl,
-                      child: Column(
-                        children: [
-                          _EditField(
-                            label: 'Judul Skripsi',
-                            controller: titleCtrl,
-                            maxLines: 3,
-                          ),
-                          _EditField(
-                            label: 'Nama Penulis',
-                            controller: nameCtrl,
-                          ),
-                          _EditField(label: 'NIM', controller: nimCtrl),
-                          _EditField(
-                            label: 'Program Studi',
-                            controller: majorCtrl,
-                          ),
-                          _EditField(
-                            label: 'Fakultas',
-                            controller: facultyCtrl,
-                          ),
-                          _EditField(label: 'Tahun', controller: yearCtrl),
-                        ],
-                      ),
-                    ),
-                  ),
-                  const SizedBox(height: 12),
-                  CustomButton(
-                    label: 'Simpan Perubahan',
-                    icon: Icons.save_rounded,
-                    onPressed: () {
-                      provider.updateItem(
-                        thesis.copyWith(
-                          title: titleCtrl.text.trim(),
-                          name: nameCtrl.text.trim(),
-                          nim: nimCtrl.text.trim(),
-                          major: majorCtrl.text.trim(),
-                          faculty: facultyCtrl.text.trim(),
-                          year: yearCtrl.text.trim(),
-                        ),
-                      );
-                      Navigator.pop(ctx);
-                    },
-                  ),
-                ],
-              ),
-            );
-          },
-        );
-      },
-    );
-  }
-
   void _confirmDelete(BuildContext context, String id, ScanProvider provider) {
     showDialog(
       context: context,
@@ -375,7 +280,7 @@ class _ReviewPageState extends State<ReviewPage>
     ScanProvider provider,
   ) async {
     final success = await provider.sendToSheets();
-    if (!success && mounted) {
+    if (!success && context.mounted) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(
           content: Text(provider.errorMessage ?? 'Pengiriman gagal.'),
@@ -383,31 +288,5 @@ class _ReviewPageState extends State<ReviewPage>
         ),
       );
     }
-  }
-}
-
-// ─── Helper widget ──────────────────────────────────────────────────────────
-
-class _EditField extends StatelessWidget {
-  final String label;
-  final TextEditingController controller;
-  final int maxLines;
-
-  const _EditField({
-    required this.label,
-    required this.controller,
-    this.maxLines = 1,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Padding(
-      padding: const EdgeInsets.only(bottom: 14),
-      child: TextField(
-        controller: controller,
-        maxLines: maxLines,
-        decoration: InputDecoration(labelText: label),
-      ),
-    );
   }
 }

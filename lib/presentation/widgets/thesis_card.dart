@@ -1,6 +1,7 @@
 // lib/presentation/widgets/thesis_card.dart
 
 import 'dart:io';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import '../../core/theme/app_theme.dart';
 import '../../data/models/thesis_model.dart';
@@ -75,6 +76,13 @@ class ThesisCard extends StatelessWidget {
                 'Tahun',
                 thesis.year,
               ),
+            if (thesis.advisor.isNotEmpty)
+              _buildField(
+                context,
+                Icons.work_rounded,
+                'Dosen Pembimbing',
+                thesis.advisor,
+              ),
           ],
         ),
       ),
@@ -82,6 +90,7 @@ class ThesisCard extends StatelessWidget {
   }
 
   Widget _buildHeader(BuildContext context) {
+    final cs = Theme.of(context).colorScheme;
     return Row(
       children: [
         _buildStatusBadge(),
@@ -92,8 +101,8 @@ class ThesisCard extends StatelessWidget {
             icon: const Icon(Icons.edit_rounded, size: 18),
             tooltip: 'Edit',
             style: IconButton.styleFrom(
-              backgroundColor: const Color(0xFFEFF6FF),
-              foregroundColor: const Color(0xFF1A56DB),
+              backgroundColor: cs.primary.withOpacity(0.08),
+              foregroundColor: cs.primary,
             ),
           ),
         const SizedBox(width: 6),
@@ -171,23 +180,36 @@ class ThesisCard extends StatelessWidget {
   Widget _buildImage() {
     return ClipRRect(
       borderRadius: BorderRadius.circular(10),
-      child: Image.file(
-        File(thesis.imagePath),
-        height: 140,
-        width: double.infinity,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => Container(
-          height: 140,
-          color: Colors.grey.shade100,
-          child: const Center(
-            child: Icon(
-              Icons.broken_image_rounded,
-              color: Colors.grey,
-              size: 40,
+      child: kIsWeb
+          ? Container(
+              height: 140,
+              color: Colors.grey.shade100,
+              width: double.infinity,
+              child: const Center(
+                child: Icon(
+                  Icons.image_rounded,
+                  color: Colors.grey,
+                  size: 40,
+                ),
+              ),
+            )
+          : Image.file(
+              File(thesis.imagePath),
+              height: 140,
+              width: double.infinity,
+              fit: BoxFit.cover,
+              errorBuilder: (_, _, _) => Container(
+                height: 140,
+                color: Colors.grey.shade100,
+                child: const Center(
+                  child: Icon(
+                    Icons.broken_image_rounded,
+                    color: Colors.grey,
+                    size: 40,
+                  ),
+                ),
+              ),
             ),
-          ),
-        ),
-      ),
     );
   }
 

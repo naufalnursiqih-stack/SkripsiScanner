@@ -87,6 +87,11 @@ class ScanProvider extends ChangeNotifier {
 
   // ─── Editing ─────────────────────────────────────────────────────────────────
 
+  void addThesis(ThesisModel item) {
+    _items.add(item);
+    notifyListeners();
+  }
+
   void updateItem(ThesisModel updated) {
     final idx = _items.indexWhere((t) => t.id == updated.id);
     if (idx != -1) {

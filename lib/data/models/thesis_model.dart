@@ -15,6 +15,7 @@ class ThesisModel {
   final String faculty;
   final String university;
   final String year;
+  final String advisor;
   final String rawOcrText;
   final ScanStatus status;
   final String? errorMessage;
@@ -30,6 +31,7 @@ class ThesisModel {
     this.faculty = '',
     this.university = '',
     this.year = '',
+    this.advisor = '',
     this.rawOcrText = '',
     this.status = ScanStatus.pending,
     this.errorMessage,
@@ -47,6 +49,7 @@ class ThesisModel {
       faculty: json['faculty'] as String? ?? '',
       university: json['university'] as String? ?? '',
       year: json['year'] as String? ?? '',
+      advisor: json['advisor'] as String? ?? '',
       rawOcrText: json['rawOcrText'] as String? ?? '',
       status: ScanStatus.values.firstWhere(
         (e) => e.name == json['status'],
@@ -70,6 +73,7 @@ class ThesisModel {
       'faculty': faculty,
       'university': university,
       'year': year,
+      'advisor': advisor,
       'rawOcrText': rawOcrText,
       'status': status.name,
       'errorMessage': errorMessage,
@@ -87,6 +91,7 @@ class ThesisModel {
       'faculty': faculty,
       'university': university,
       'year': year,
+      'advisor': advisor,
       'scannedAt': scannedAt.toIso8601String(),
     };
   }
@@ -101,6 +106,7 @@ class ThesisModel {
     String? faculty,
     String? university,
     String? year,
+    String? advisor,
     String? rawOcrText,
     ScanStatus? status,
     String? errorMessage,
@@ -116,6 +122,7 @@ class ThesisModel {
       faculty: faculty ?? this.faculty,
       university: university ?? this.university,
       year: year ?? this.year,
+      advisor: advisor ?? this.advisor,
       rawOcrText: rawOcrText ?? this.rawOcrText,
       status: status ?? this.status,
       errorMessage: errorMessage ?? this.errorMessage,
