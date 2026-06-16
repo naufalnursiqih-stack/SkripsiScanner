@@ -34,7 +34,7 @@ class ApiService {
 
       var response = await _client
           .post(
-            Uri.parse(urlString),
+            Uri.parse(urlString), // analisa terakhir ada disini
             headers: {'Content-Type': 'application/json'},
             body: payload,
           )

@@ -541,7 +541,6 @@ class _CustomFormCard extends StatefulWidget {
     required this.controller,
     this.maxLines = 1,
     required this.placeholder,
-    this.showWarningIfEmpty = true,
   });
 
   @override

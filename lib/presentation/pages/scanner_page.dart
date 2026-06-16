@@ -9,7 +9,6 @@ import 'package:provider/provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import '../../core/constants/app_constants.dart';
 import '../providers/scan_provider.dart';
-import 'review_page.dart';
 import 'edit_page.dart';
 import 'dashboard_shell.dart';
 
@@ -368,7 +367,7 @@ class _ScannerPageState extends State<ScannerPage>
                       child: ListView.separated(
                         scrollDirection: Axis.horizontal,
                         itemCount: _selectedPaths.length,
-                        separatorBuilder: (_, __) => const SizedBox(width: 12),
+                        separatorBuilder: (_, _) => const SizedBox(width: 12),
                         itemBuilder: (context, index) {
                           return Stack(
                             children: [

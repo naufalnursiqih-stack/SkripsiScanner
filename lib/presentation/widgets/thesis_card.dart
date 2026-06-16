@@ -96,7 +96,7 @@ class ThesisCard extends StatelessWidget {
                             ? Image.file(
                                 File(thesis.imagePath),
                                 fit: BoxFit.cover,
-                                errorBuilder: (_, __, ___) => const Center(
+                                errorBuilder: (_, _, _) => const Center(
                                   child: Icon(
                                     Icons.broken_image_rounded,
                                     color: Color(0xFF6F7973),

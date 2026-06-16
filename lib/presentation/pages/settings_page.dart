@@ -39,7 +39,7 @@ class _SettingsPageState extends State<SettingsPage> {
     if (!_formKey.currentState!.validate()) return;
 
     setState(() => _isLoading = true);
-    await StorageService.saveSpreadsheetUrl(_urlController.text.trim());
+    await StorageService.saveSpreadsheetUrl(_urlController.text.trim()); // Memanggil fungsi dari storage service untuk menyimpan URL
     setState(() => _isLoading = false);
 
     if (mounted) {
@@ -158,8 +158,8 @@ class _SettingsPageState extends State<SettingsPage> {
                           if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
                             return 'Format URL harus dimulai dengan http:// atau https://';
                           }
-                          if (!trimmed.contains('script.google.com')) {
-                            return 'Pastikan ini adalah URL Google Apps Script yang valid';
+                          if (!trimmed.contains('docs.google.com/spreadsheets')) {
+                            return 'Pastikan ini adalah URL Google Spreadsheet yang valid';
                           }
                           return null;
                         },
