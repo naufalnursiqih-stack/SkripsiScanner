@@ -242,15 +242,18 @@ class _ScannerPageState extends State<ScannerPage>
             maxAssets: AppConstants.maxBatchSize - _selectedPaths.length,
             requestType: RequestType.image,
             gridCount: 3,
-            pageSize: 80,
+            pageSize: 90,
           ),
         );
 
         if (assets != null && assets.isNotEmpty) {
           final paths = <String>[];
           for (final asset in assets) {
-            final file = await asset.originFile;
-            if (file != null) paths.add(file.path);
+            var file = await asset.originFile;
+            file ??= await asset.file;
+            if (file != null) {
+              paths.add(file.path);
+            }
           }
           setState(() => _selectedPaths.addAll(paths));
           if (mounted) {
@@ -474,9 +477,9 @@ class _ScannerPageState extends State<ScannerPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: Colors.black,
+      backgroundColor: const Color(0xFF1E5E3A), // UIN Green theme background
       appBar: AppBar(
-        backgroundColor: Colors.black,
+        backgroundColor: const Color(0xFF1E5E3A), // UIN Green theme appBar
         foregroundColor: Colors.white,
         title: const Text(
           'Pindai Sampul',
@@ -505,171 +508,152 @@ class _ScannerPageState extends State<ScannerPage>
         children: [
           // Preview Kamera Terintegrasi
           Expanded(
-            child: Stack(
-              alignment: Alignment.center,
-              children: [
-                // Live Camera Preview atau Loading State
-                Container(
-                  color: const Color(0xFF070B08),
-                  width: double.infinity,
-                  height: double.infinity,
-                  child: _isCameraInitialized && _cameraController != null
-                      ? LayoutBuilder(
-                          builder: (context, constraints) {
-                            final camera = _cameraController!.value;
-                            // Rasio aspek kamera (lanskap, e.g. 1.777) diubah ke potret (1 / 1.777 = 0.5625)
-                            final cameraRatio = 1 / camera.aspectRatio;
-                            
-                            // Rasio aspek dari area tampilan container
-                            final containerRatio = constraints.maxWidth / constraints.maxHeight;
-                            
-                            // Hitung skala perbesaran agar memenuhi layar tanpa merusak rasio (tidak penyok)
-                            double scale = 1.0;
-                            if (containerRatio > cameraRatio) {
-                              scale = containerRatio / cameraRatio;
-                            } else {
-                              scale = cameraRatio / containerRatio;
-                            }
-                            
-                            return ClipRect(
-                              child: Transform.scale(
-                                scale: scale,
-                                child: Center(
-                                  child: AspectRatio(
-                                    aspectRatio: cameraRatio,
-                                    child: CameraPreview(_cameraController!),
+            child: Container(
+              color: const Color(0xFF070B08),
+              width: double.infinity,
+              height: double.infinity,
+              child: _isCameraInitialized && _cameraController != null
+                  ? LayoutBuilder(
+                      builder: (context, constraints) {
+                        final camera = _cameraController!.value;
+                        final cameraRatio = 1 / camera.aspectRatio;
+
+                        return Center(
+                          child: AspectRatio(
+                            aspectRatio: cameraRatio,
+                            child: Stack(
+                              alignment: Alignment.center,
+                              children: [
+                                // Camera Preview
+                                CameraPreview(_cameraController!),
+
+                                // Garis bantu pemosisian gambar (grid)
+                                Positioned.fill(
+                                  child: CustomPaint(
+                                    painter: _GridPainter(),
                                   ),
                                 ),
-                              ),
-                            );
-                          },
-                        )
-                      : Center(
-                          child: Column(
-                            mainAxisAlignment: MainAxisAlignment.center,
-                            children: [
-                              if (_isCameraInitializing)
-                                const CircularProgressIndicator(
-                                  color: Color(0xFFFCBF48),
-                                )
-                              else ...[
-                                Icon(
-                                  Icons.camera_alt_rounded,
-                                  color: Colors.white.withOpacity(0.04),
-                                  size: 96,
+
+                                // Bingkai penanda letak dokumen (di dalam AspectRatio agar selaras)
+                                Padding(
+                                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
+                                  child: Stack(
+                                    children: [
+                                      // Kotak dengan garis putus-putus
+                                      Container(
+                                        decoration: BoxDecoration(
+                                          border: Border.all(
+                                            color: Colors.white.withOpacity(0.3),
+                                            width: 1.5,
+                                          ),
+                                          borderRadius: BorderRadius.circular(16),
+                                        ),
+                                      ),
+
+                                      // Siku-siku di setiap sudut bingkai
+                                      const Positioned(top: 0, left: 0, child: _CornerBracket(top: true, left: true)),
+                                      const Positioned(top: 0, right: 0, child: _CornerBracket(top: true, left: false)),
+                                      const Positioned(bottom: 0, left: 0, child: _CornerBracket(top: false, left: true)),
+                                      const Positioned(bottom: 0, right: 0, child: _CornerBracket(top: false, left: false)),
+
+                                      // Animasi garis laser scan
+                                      Positioned.fill(
+                                        child: ClipRRect(
+                                          borderRadius: BorderRadius.circular(16),
+                                          child: AnimatedBuilder(
+                                            animation: _scanController,
+                                            builder: (context, child) {
+                                              return Align(
+                                                alignment: Alignment(0.0, -1.0 + (_scanController.value * 2.0)),
+                                                child: child!,
+                                              );
+                                            },
+                                            child: Container(
+                                              height: 3,
+                                              width: double.infinity,
+                                              decoration: BoxDecoration(
+                                                gradient: LinearGradient(
+                                                  colors: [
+                                                    Colors.transparent,
+                                                    const Color(0xFFFCBF48).withOpacity(0.9),
+                                                    Colors.transparent,
+                                                  ],
+                                                ),
+                                                boxShadow: [
+                                                  BoxShadow(
+                                                    color: const Color(0xFFFCBF48).withOpacity(0.5),
+                                                    blurRadius: 8,
+                                                    spreadRadius: 1,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    ],
+                                  ),
                                 ),
-                                const SizedBox(height: 8),
-                                Text(
-                                  'Kamera sedang bersiap...',
-                                  style: TextStyle(
-                                    color: Colors.white.withOpacity(0.15),
-                                    fontSize: 13,
-                                    fontWeight: FontWeight.w500,
+
+                                // Teks petunjuk di atas kamera
+                                Positioned(
+                                  top: 16,
+                                  child: Container(
+                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                    decoration: BoxDecoration(
+                                      color: Colors.black.withOpacity(0.6),
+                                      borderRadius: BorderRadius.circular(20),
+                                    ),
+                                    child: const Text(
+                                      'Posisikan cover skripsi di dalam bingkai',
+                                      style: TextStyle(
+                                        color: Colors.white,
+                                        fontSize: 11,
+                                        fontWeight: FontWeight.w600,
+                                        fontFamily: 'Inter',
+                                      ),
+                                    ),
                                   ),
                                 ),
                               ],
-                            ],
-                          ),
-                        ),
-                ),
-
-                // Garis bantu pemosisian gambar (grid)
-                Positioned.fill(
-                  child: CustomPaint(
-                    painter: _GridPainter(),
-                  ),
-                ),
-
-                // Bingkai penanda letak dokumen
-                Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 40.0, vertical: 80.0),
-                  child: Container(
-                    child: Stack(
-                      children: [
-                        // Kotak dengan garis putus-putus
-                        Container(
-                          decoration: BoxDecoration(
-                            border: Border.all(
-                              color: Colors.white.withOpacity(0.15),
-                              width: 1.5,
                             ),
-                            borderRadius: BorderRadius.circular(16),
                           ),
-                        ),
-
-                        // Siku-siku di setiap sudut bingkai
-                        const Positioned(top: 0, left: 0, child: _CornerBracket(top: true, left: true)),
-                        const Positioned(top: 0, right: 0, child: _CornerBracket(top: true, left: false)),
-                        const Positioned(bottom: 0, left: 0, child: _CornerBracket(top: false, left: true)),
-                        const Positioned(bottom: 0, right: 0, child: _CornerBracket(top: false, left: false)),
-
-                        // Animasi garis laser berwarna emas
-                        Positioned.fill(
-                          child: ClipRRect(
-                            borderRadius: BorderRadius.circular(16),
-                            child: AnimatedBuilder(
-                              animation: _scanController,
-                              builder: (context, child) {
-                                return Align(
-                                  alignment: Alignment(0.0, -1.0 + (_scanController.value * 2.0)),
-                                  child: child!,
-                                );
-                              },
-                              child: Container(
-                                height: 3,
-                                width: double.infinity,
-                                decoration: BoxDecoration(
-                                  gradient: LinearGradient(
-                                    colors: [
-                                      Colors.transparent,
-                                      const Color(0xFFFCBF48).withOpacity(0.9),
-                                      Colors.transparent,
-                                    ],
-                                  ),
-                                  boxShadow: [
-                                    BoxShadow(
-                                      color: const Color(0xFFFCBF48).withOpacity(0.5),
-                                      blurRadius: 8,
-                                      spreadRadius: 1,
-                                    ),
-                                  ],
-                                ),
+                        );
+                      },
+                    )
+                  : Center(
+                      child: Column(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          if (_isCameraInitializing)
+                            const CircularProgressIndicator(
+                              color: Color(0xFFFCBF48),
+                            )
+                          else ...[
+                            Icon(
+                              Icons.camera_alt_rounded,
+                              color: Colors.white.withOpacity(0.04),
+                              size: 96,
+                            ),
+                            const SizedBox(height: 8),
+                            Text(
+                              'Kamera sedang bersiap...',
+                              style: TextStyle(
+                                color: Colors.white.withOpacity(0.15),
+                                fontSize: 13,
+                                fontWeight: FontWeight.w500,
                               ),
                             ),
-                          ),
-                        ),
-                      ],
-                    ),
-                  ),
-                ),
-
-                // Teks petunjuk di atas kamera
-                Positioned(
-                  top: 20,
-                  child: Container(
-                    padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
-                    decoration: BoxDecoration(
-                      color: Colors.black.withOpacity(0.6),
-                      borderRadius: BorderRadius.circular(20),
-                    ),
-                    child: const Text(
-                      'Posisikan cover skripsi di dalam bingkai',
-                      style: TextStyle(
-                        color: Colors.white,
-                        fontSize: 12,
-                        fontWeight: FontWeight.w600,
-                        fontFamily: 'Inter',
+                          ],
+                        ],
                       ),
                     ),
-                  ),
-                ),
-              ],
             ),
           ),
 
           // Area tombol shutter kamera
           Container(
-            color: const Color(0xFF0F172A), // Slate 900
+            color: const Color(0xFF133C25), // Match UIN Dark Green bottom theme
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
             child: Column(
               mainAxisSize: MainAxisSize.min,

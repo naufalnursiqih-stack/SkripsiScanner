@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';
 import 'package:provider/provider.dart';
+import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import '../providers/scan_provider.dart';
 import '../../data/models/thesis_model.dart';
 import 'scanner_page.dart';
@@ -313,7 +314,7 @@ class _HomePageState extends State<HomePage> {
           child: AspectRatio(
             aspectRatio: 1.0,
             child: InkWell(
-              onTap: () => _navigateToScanner(context, fromCamera: false),
+              onTap: () => _importFromGalleryDirect(context),
               borderRadius: BorderRadius.circular(_globalRadius),
               child: Container(
                 decoration: BoxDecoration(
@@ -592,6 +593,112 @@ class _HomePageState extends State<HomePage> {
     if (result == true && context.mounted) {
       final shellState = context.findAncestorStateOfType<DashboardShellState>();
       shellState?.setTabIndex(1);
+    }
+  }
+
+  Future<void> _importFromGalleryDirect(BuildContext context) async {
+    try {
+      final provider = context.read<ScanProvider>();
+      
+      // Buka galeri pemilih gambar menggunakan wechat_assets_picker
+      final assets = await AssetPicker.pickAssets(
+        context,
+        pickerConfig: const AssetPickerConfig(
+          maxAssets: 20, // Batas maksimum batch
+          requestType: RequestType.image,
+          gridCount: 3,
+          pageSize: 90,
+        ),
+      );
+
+      if (assets != null && assets.isNotEmpty) {
+        // Tampilkan loading dialog agar user tahu proses ekstraksi sedang berjalan
+        if (!context.mounted) return;
+        showDialog(
+          context: context,
+          barrierDismissible: false,
+          builder: (ctx) => const Center(
+            child: Card(
+              color: Colors.white,
+              child: Padding(
+                padding: EdgeInsets.all(24.0),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    CircularProgressIndicator(color: _uinGreen),
+                    SizedBox(height: 16),
+                    Text(
+                      'Mengekstrak teks skripsi...',
+                      style: TextStyle(
+                        fontFamily: 'Inter',
+                        fontWeight: FontWeight.bold,
+                        color: _uinGreen,
+                      ),
+                    ),
+                  ],
+                ),
+              ),
+            ),
+          ),
+        );
+
+        final paths = <String>[];
+        for (final asset in assets) {
+          var file = await asset.originFile;
+          file ??= await asset.file;
+          if (file != null) {
+            paths.add(file.path);
+          }
+        }
+
+        if (paths.isEmpty) {
+          if (!context.mounted) return;
+          ScaffoldMessenger.of(context).showSnackBar(
+            const SnackBar(
+              content: Text('Gagal memuat file gambar dari galeri.'),
+              backgroundColor: Colors.red,
+              behavior: SnackBarBehavior.floating,
+            ),
+          );
+          return;
+        }
+
+        // Lakukan pemrosesan OCR
+        await provider.scanImages(paths);
+
+        if (!context.mounted) return;
+        Navigator.pop(context); // Tutup loading dialog
+
+        if (paths.length == 1) {
+          // Jika hanya 1 gambar, langsung arahkan ke halaman Edit
+          final newlyScannedItem = provider.items.last;
+          Navigator.push(
+            context,
+            MaterialPageRoute(
+              builder: (_) => EditPage(
+                thesis: newlyScannedItem,
+                fromScanner: true,
+              ),
+            ),
+          );
+        } else {
+          // Jika banyak gambar, arahkan ke Tab Review
+          final shellState = context.findAncestorStateOfType<DashboardShellState>();
+          if (shellState != null) {
+            shellState.setTabIndex(1);
+          } else {
+            Navigator.push(
+              context,
+              MaterialPageRoute(builder: (_) => const ReviewPage()),
+            );
+          }
+        }
+      }
+    } catch (e) {
+      if (!context.mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Gagal membuka galeri: $e'), backgroundColor: Colors.red),
+      );
     }
   }
 
