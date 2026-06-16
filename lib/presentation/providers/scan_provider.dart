@@ -39,9 +39,9 @@ class ScanProvider extends ChangeNotifier {
 
   double get progress => _totalCount == 0 ? 0 : _processedCount / _totalCount;
 
-  // ─── Scanning ────────────────────────────────────────────────────────────────
+  // ─── Pemindaian (Scanning) ──────────────────────────────────────────────────
 
-  /// Takes a list of image file paths and runs OCR on each.
+  /// Menerima daftar path gambar dan menjalankan OCR pada masing-masing gambar.
   Future<void> scanImages(List<String> imagePaths) async {
     if (imagePaths.isEmpty) return;
 
@@ -51,7 +51,7 @@ class ScanProvider extends ChangeNotifier {
     _errorMessage = null;
     notifyListeners();
 
-    // Create pending models
+    // Buat data model awal dengan status pending
     final newModels = imagePaths
         .map(
           (path) => ThesisModel(
@@ -66,12 +66,12 @@ class ScanProvider extends ChangeNotifier {
     _items.addAll(newModels);
     notifyListeners();
 
-    // Process each image
+    // Proses setiap gambar satu per satu
     for (int i = 0; i < newModels.length; i++) {
       final idx = _items.indexWhere((t) => t.id == newModels[i].id);
       if (idx == -1) continue;
 
-      // Mark as processing
+      // Tandai status sedang memproses
       _items[idx] = _items[idx].copyWith(status: ScanStatus.processing);
       notifyListeners();
 
@@ -85,7 +85,12 @@ class ScanProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Editing ─────────────────────────────────────────────────────────────────
+  // ─── Edit Data ────────────────────────────────────────────────────────────────
+
+  void addThesis(ThesisModel item) {
+    _items.add(item);
+    notifyListeners();
+  }
 
   void updateItem(ThesisModel updated) {
     final idx = _items.indexWhere((t) => t.id == updated.id);
@@ -109,11 +114,17 @@ class ScanProvider extends ChangeNotifier {
     notifyListeners();
   }
 
-  // ─── Sending ─────────────────────────────────────────────────────────────────
+  void resetState() {
+    _state = ProviderState.idle;
+    _errorMessage = null;
+    notifyListeners();
+  }
 
-  /// Sends all successfully-scanned items to Google Sheets via batch POST.
-  Future<bool> sendToSheets() async {
-    final toSend = successItems;
+  // ─── Pengiriman Data ──────────────────────────────────────────────────────────
+
+  /// Mengirim semua data yang berhasil dipindai ke Google Sheets dalam satu kelompok (batch).
+  Future<bool> sendToSheets({List<ThesisModel>? specificItems}) async {
+    final toSend = specificItems ?? successItems;
     if (toSend.isEmpty) return false;
 
     _state = ProviderState.sending;
@@ -133,7 +144,7 @@ class ScanProvider extends ChangeNotifier {
     return result.success;
   }
 
-  /// Sends a single item — useful for retry.
+  /// Mengirim satu data saja — berguna untuk mencoba kembali jika gagal.
   Future<bool> retrySend(ThesisModel thesis) async {
     final result = await _api.sendThesis(thesis);
     if (!result.success) _errorMessage = result.message;

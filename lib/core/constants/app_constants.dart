@@ -10,8 +10,7 @@ class AppConstants {
   /// 3. Deploy → New Deployment → Web App
   /// 4. Set "Who has access" to "Anyone"
   /// 5. Copy the Web App URL here
-  static const String googleAppsScriptUrl =
-      'https://script.google.com/macros/s/AKfycbz_35c_fBJEUepiib5KhMw9H0o3QuKb2hFuYT9Y5nUcMmRJVRtgvqlhdm0PYfiAjepICw/exec';
+  static const String googleAppsScriptUrl = 'https://script.google.com/macros/s/AKfycbwGP97yTRcAvof66wypTCc1RpRaeiCS1HNiRcy6q9NbhulGmUryB0NvNb2ldESdKnKbUg/exec';
 
   static const String appName = 'SkripsiScan';
   static const String appVersion = '1.0.0';

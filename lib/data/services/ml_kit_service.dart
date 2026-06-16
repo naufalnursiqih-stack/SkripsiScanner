@@ -2,6 +2,7 @@
 
 import 'dart:io';
 import 'package:flutter/foundation.dart';
+import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:google_mlkit_text_recognition/google_mlkit_text_recognition.dart';
 import '../../core/utils/regex_helper.dart';
 import '../models/thesis_model.dart';
@@ -27,7 +28,30 @@ class MLKitService {
     }
 
     try {
-      final inputImage = InputImage.fromFile(File(model.imagePath));
+      // Perbaiki rotasi gambar secara fisik menggunakan flutter_image_compress
+      // agar ML Kit tidak membaca teks secara miring/sideways
+      String finalImagePath = model.imagePath;
+      try {
+        final file = File(model.imagePath);
+        final tempDir = Directory.systemTemp;
+        final targetPath = '${tempDir.path}/rotated_${DateTime.now().millisecondsSinceEpoch}.jpg';
+        
+        final compressedFile = await FlutterImageCompress.compressAndGetFile(
+          file.absolute.path,
+          targetPath,
+          quality: 95,
+          keepExif: false, // Hapus EXIF agar rotasi langsung terpanggang di pixel gambar
+          autoCorrectionAngle: true, // Putar otomatis sesuai EXIF orientation tag
+        );
+        
+        if (compressedFile != null) {
+          finalImagePath = compressedFile.path;
+        }
+      } catch (e) {
+        debugPrint('[MLKitService] Gagal memutar gambar: $e');
+      }
+
+      final inputImage = InputImage.fromFile(File(finalImagePath));
       final recognizedText = await _recognizer.processImage(inputImage);
       final rawText = recognizedText.text;
 

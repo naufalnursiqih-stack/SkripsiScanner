@@ -5,10 +5,10 @@ import 'package:flutter/material.dart';
 class AppTheme {
   AppTheme._();
 
-  static const _primaryColor = Color(0xFF1A56DB);
-  static const _secondaryColor = Color(0xFF0E9F6E);
+  static const _primaryColor = Color(0xFF004625);
+  static const _secondaryColor = Color(0xFFFCBF48);
   static const _errorColor = Color(0xFFE02424);
-  static const _surfaceColor = Color(0xFFF9FAFB);
+  static const _surfaceColor = Color(0xFFF8FAF7);
   static const _cardColor = Colors.white;
 
   static ThemeData get light {

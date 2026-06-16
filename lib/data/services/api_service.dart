@@ -3,8 +3,8 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import '../../core/constants/app_constants.dart';
 import '../models/thesis_model.dart';
+import 'storage_service.dart';
 
 class ApiResult {
   final bool success;
@@ -30,10 +30,11 @@ class ApiService {
   Future<ApiResult> sendThesis(ThesisModel thesis) async {
     try {
       final payload = jsonEncode(thesis.toApiPayload());
+      final urlString = await StorageService.getSpreadsheetUrl();
 
       var response = await _client
           .post(
-            Uri.parse(AppConstants.googleAppsScriptUrl),
+            Uri.parse(urlString), // analisa terakhir ada disini
             headers: {'Content-Type': 'application/json'},
             body: payload,
           )
@@ -71,10 +72,11 @@ class ApiService {
       final payload = jsonEncode({
         'batch': theses.map((t) => t.toApiPayload()).toList(),
       });
+      final urlString = await StorageService.getSpreadsheetUrl();
 
       var response = await _client
           .post(
-            Uri.parse(AppConstants.googleAppsScriptUrl),
+            Uri.parse(urlString),
             headers: {'Content-Type': 'application/json'},
             body: payload,
           )
