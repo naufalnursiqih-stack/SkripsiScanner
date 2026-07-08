@@ -29,6 +29,8 @@ class _EditPageState extends State<EditPage> {
   late TextEditingController _nameController;
   late TextEditingController _nimController;
   late TextEditingController _majorController;
+  late TextEditingController _facultyController;
+  late TextEditingController _universityController;
   late TextEditingController _yearController;
   late TextEditingController _advisorController;
 
@@ -45,6 +47,8 @@ class _EditPageState extends State<EditPage> {
     _nameController = TextEditingController(text: widget.thesis.name);
     _nimController = TextEditingController(text: widget.thesis.nim);
     _majorController = TextEditingController(text: widget.thesis.major);
+    _facultyController = TextEditingController(text: widget.thesis.faculty);
+    _universityController = TextEditingController(text: widget.thesis.university);
     _yearController = TextEditingController(text: widget.thesis.year);
     _advisorController = TextEditingController(text: widget.thesis.advisor);
 
@@ -63,6 +67,8 @@ class _EditPageState extends State<EditPage> {
     _nameController.dispose();
     _nimController.dispose();
     _majorController.dispose();
+    _facultyController.dispose();
+    _universityController.dispose();
     _yearController.dispose();
     _advisorController.dispose();
     _scrollController.dispose();
@@ -82,6 +88,8 @@ class _EditPageState extends State<EditPage> {
       name: _nameController.text.trim(),
       nim: _nimController.text.trim(),
       major: _majorController.text.trim(),
+      faculty: _facultyController.text.trim(),
+      university: _universityController.text.trim(),
       year: _yearController.text.trim(),
       advisor: _advisorController.text.trim(),
       status: ScanStatus.success, // Ensure it is marked as successfully processed
@@ -332,6 +340,18 @@ class _EditPageState extends State<EditPage> {
                       ),
                       const SizedBox(height: 16),
                       _CustomFormCard(
+                        label: 'Fakultas',
+                        controller: _facultyController,
+                        placeholder: 'Fakultas tidak terdeteksi, ketuk untuk mengisi manual',
+                      ),
+                      const SizedBox(height: 16),
+                      _CustomFormCard(
+                        label: 'Universitas / Nama Kampus',
+                        controller: _universityController,
+                        placeholder: 'Nama kampus tidak terdeteksi, ketuk untuk mengisi manual',
+                      ),
+                      const SizedBox(height: 16),
+                      _CustomFormCard(
                         label: 'Tahun Kelulusan',
                         controller: _yearController,
                         placeholder: 'Tahun kelulusan tidak terdeteksi, ketuk untuk mengisi manual',
@@ -541,6 +561,7 @@ class _CustomFormCard extends StatefulWidget {
     required this.controller,
     this.maxLines = 1,
     required this.placeholder,
+    this.showWarningIfEmpty = true,
   });
 
   @override

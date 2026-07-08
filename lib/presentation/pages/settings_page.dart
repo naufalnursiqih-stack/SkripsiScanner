@@ -24,7 +24,14 @@ class _SettingsPageState extends State<SettingsPage> {
   Future<void> _loadSavedUrl() async {
     final url = await StorageService.getSpreadsheetUrl();
     setState(() {
-      _urlController.text = url;
+      // KETERANGAN (Perbaikan Bug): 
+      // Jika URL yang tersimpan adalah Google Spreadsheet, tampilkan di kolom input.
+      // Jika bernilai bawaan/default (berupa Web App Apps Script URL), tampilkan kosong (blank).
+      if (url.contains('docs.google.com/spreadsheets')) {
+        _urlController.text = url;
+      } else {
+        _urlController.text = '';
+      }
       _isLoading = false;
     });
   }
@@ -50,7 +57,6 @@ class _SettingsPageState extends State<SettingsPage> {
           behavior: SnackBarBehavior.floating,
         ),
       );
-      Navigator.pop(context);
     }
   }
 
@@ -123,13 +129,13 @@ class _SettingsPageState extends State<SettingsPage> {
                         ),
                         cursorColor: const Color(0xFF1E5E3A),
                         decoration: InputDecoration(
-                          labelText: 'Google Apps Script Web App URL',
+                          labelText: 'Google Spreadsheet URL',
                           labelStyle: const TextStyle(
                             color: Color(0xFF3F4944),
                             fontWeight: FontWeight.w600,
                             fontSize: 13,
                           ),
-                          hintText: 'https://script.google.com/macros/s/.../exec',
+                          hintText: 'https://docs.google.com/spreadsheets/d/...',
                           hintStyle: const TextStyle(color: Colors.grey, fontSize: 13, fontStyle: FontStyle.italic),
                           alignLabelWithHint: true,
                           enabledBorder: OutlineInputBorder(
@@ -151,13 +157,17 @@ class _SettingsPageState extends State<SettingsPage> {
                           contentPadding: const EdgeInsets.symmetric(horizontal: 12, vertical: 12),
                         ),
                         validator: (value) {
+                          // KETERANGAN (Perbaikan Bug):
+                          // Diperbolehkan kosong agar user bisa menghapus kustomisasi
+                          // dan kembali menggunakan spreadsheet bawaan aplikasi.
                           if (value == null || value.trim().isEmpty) {
-                            return 'URL tidak boleh kosong';
+                            return null;
                           }
                           final trimmed = value.trim();
                           if (!trimmed.startsWith('http://') && !trimmed.startsWith('https://')) {
                             return 'Format URL harus dimulai dengan http:// atau https://';
                           }
+                          // Validasi memastikan input adalah URL Google Spreadsheet biasa (kustom), bukan Apps Script.
                           if (!trimmed.contains('docs.google.com/spreadsheets')) {
                             return 'Pastikan ini adalah URL Google Spreadsheet yang valid';
                           }

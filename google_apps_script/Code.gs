@@ -46,7 +46,17 @@ function doPost(e) {
       records = [body];
     }
 
-    var sheet = getOrCreateSheet();
+    // KETERANGAN: Membuka spreadsheet secara dinamis berdasarkan parameter dari Flutter.
+    // Jika parameter spreadsheetUrl dikirim, kita buka spreadsheet tersebut menggunakan openByUrl.
+    // Jika tidak dikirim (atau kosong), kita fallback ke spreadsheet bawaan (getActiveSpreadsheet).
+    var ss;
+    if (body.spreadsheetUrl) {
+      ss = SpreadsheetApp.openByUrl(body.spreadsheetUrl);
+    } else {
+      ss = SpreadsheetApp.getActiveSpreadsheet();
+    }
+
+    var sheet = getOrCreateSheet(ss);
     var insertedCount = 0;
 
     for (var i = 0; i < records.length; i++) {
@@ -87,8 +97,9 @@ function doGet(e) {
 /**
  * Returns the data sheet, creating it (with headers) if it doesn't exist.
  */
-function getOrCreateSheet() {
-  var ss = SpreadsheetApp.getActiveSpreadsheet();
+function getOrCreateSheet(ss) {
+  // KETERANGAN: Gunakan spreadsheet yang di-pass secara dinamis. Jika null, gunakan default.
+  if (!ss) ss = SpreadsheetApp.getActiveSpreadsheet();
   var sheet = ss.getSheetByName(SHEET_NAME);
 
   if (!sheet) {
