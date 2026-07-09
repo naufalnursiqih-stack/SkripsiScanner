@@ -1,6 +1,7 @@
 // lib/core/theme/app_theme.dart
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 
 class AppTheme {
   AppTheme._();
@@ -22,16 +23,17 @@ class AppTheme {
       ),
       scaffoldBackgroundColor: _surfaceColor,
       cardColor: _cardColor,
-      fontFamily: 'Roboto',
-      appBarTheme: const AppBarTheme(
+      fontFamily: GoogleFonts.plusJakartaSans().fontFamily,
+      appBarTheme: AppBarTheme(
         centerTitle: true,
         elevation: 0,
         backgroundColor: Colors.white,
-        foregroundColor: Color(0xFF111827),
+        foregroundColor: const Color(0xFF111827),
         titleTextStyle: TextStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
-          color: Color(0xFF111827),
+          color: const Color(0xFF111827),
+          fontFamily: GoogleFonts.poppins().fontFamily,
         ),
       ),
       elevatedButtonTheme: ElevatedButtonThemeData(
@@ -42,9 +44,10 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
+            fontFamily: GoogleFonts.poppins().fontFamily,
           ),
         ),
       ),
@@ -56,9 +59,10 @@ class AppTheme {
           shape: RoundedRectangleBorder(
             borderRadius: BorderRadius.circular(12),
           ),
-          textStyle: const TextStyle(
+          textStyle: TextStyle(
             fontSize: 15,
             fontWeight: FontWeight.w600,
+            fontFamily: GoogleFonts.poppins().fontFamily,
           ),
         ),
       ),

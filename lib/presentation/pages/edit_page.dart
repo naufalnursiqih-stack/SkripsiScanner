@@ -3,6 +3,7 @@
 import 'dart:io';
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/thesis_model.dart';
 import '../../data/services/api_service.dart';
@@ -119,7 +120,7 @@ class _EditPageState extends State<EditPage> {
               SizedBox(width: 8),
               Text(
                 'Berhasil Disimpan ke Google Sheets!',
-                style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold),
+                style: TextStyle(fontWeight: FontWeight.bold),
               ),
             ],
           ),
@@ -176,13 +177,13 @@ class _EditPageState extends State<EditPage> {
           icon: const Icon(Icons.arrow_back_rounded, color: Colors.white),
           onPressed: () => Navigator.pop(context),
         ),
-        title: const Text(
+        title: Text(
           'SkripsiScan',
           style: TextStyle(
             color: Colors.white,
             fontWeight: FontWeight.bold,
             fontSize: 22,
-            fontFamily: 'Inter',
+            fontFamily: GoogleFonts.poppins().fontFamily,
           ),
         ),
         centerTitle: false,
@@ -280,7 +281,6 @@ class _EditPageState extends State<EditPage> {
                                   color: Color(0xFF684000), // on-secondary-container
                                   fontSize: 12,
                                   fontWeight: FontWeight.bold,
-                                  fontFamily: 'Inter',
                                 ),
                               ),
                             ],
@@ -291,13 +291,13 @@ class _EditPageState extends State<EditPage> {
                   ),
 
                   // Section Header
-                  const Text(
+                  Text(
                     'Review & Koreksi Data',
                     style: TextStyle(
                       color: Colors.white,
                       fontSize: 18,
                       fontWeight: FontWeight.w600,
-                      fontFamily: 'Inter',
+                      fontFamily: GoogleFonts.poppins().fontFamily,
                     ),
                   ),
                   const SizedBox(height: 4),
@@ -306,7 +306,6 @@ class _EditPageState extends State<EditPage> {
                     style: TextStyle(
                       color: Colors.white70,
                       fontSize: 14,
-                      fontFamily: 'Inter',
                     ),
                   ),
                   const SizedBox(height: 20),
@@ -413,7 +412,6 @@ class _EditPageState extends State<EditPage> {
                           color: errorColor,
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
                         ),
                       ),
                       style: OutlinedButton.styleFrom(
@@ -505,7 +503,6 @@ class _EditPageState extends State<EditPage> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Inter',
             ),
           ),
         ],
@@ -523,7 +520,6 @@ class _EditPageState extends State<EditPage> {
             style: TextStyle(
               fontSize: 14,
               fontWeight: FontWeight.bold,
-              fontFamily: 'Inter',
             ),
           ),
         ],
@@ -540,7 +536,6 @@ class _EditPageState extends State<EditPage> {
           style: TextStyle(
             fontSize: 14,
             fontWeight: FontWeight.bold,
-            fontFamily: 'Inter',
           ),
         ),
       ],
@@ -643,7 +638,6 @@ class _CustomFormCardState extends State<_CustomFormCard> {
                     fontSize: 12,
                     fontWeight: FontWeight.w600,
                     color: Color(0xFF3F4944), // text-on-surface-variant
-                    fontFamily: 'Inter',
                   ),
                 ),
                 const SizedBox(height: 6),
@@ -654,7 +648,6 @@ class _CustomFormCardState extends State<_CustomFormCard> {
                   style: TextStyle(
                     fontSize: 16,
                     color: showWarning ? errorColor : const Color(0xFF191C1E),
-                    fontFamily: 'Inter',
                     fontWeight: widget.maxLines > 1 ? FontWeight.normal : FontWeight.w500,
                     fontStyle: showWarning ? FontStyle.italic : FontStyle.normal,
                   ),

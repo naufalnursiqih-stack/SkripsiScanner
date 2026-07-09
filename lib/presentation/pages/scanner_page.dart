@@ -22,13 +22,12 @@ class ScannerPage extends StatefulWidget {
 }
 
 class _ScannerPageState extends State<ScannerPage>
-    with SingleTickerProviderStateMixin, WidgetsBindingObserver {
+    with WidgetsBindingObserver { // Menghapus SingleTickerProviderStateMixin karena animasi dibuang
   final _picker = ImagePicker();
   final List<String> _selectedPaths = [];
   bool _isPicking = false;
-  bool _isMultiPage = false; // Mode single atau multi halaman
-  late AnimationController _scanController;
-
+  bool _isMultiPage = false; 
+  
   CameraController? _cameraController;
   bool _isCameraInitialized = false;
   bool _isCameraInitializing = false;
@@ -38,16 +37,10 @@ class _ScannerPageState extends State<ScannerPage>
   void initState() {
     super.initState();
     WidgetsBinding.instance.addObserver(this);
-    _isMultiPage = !widget.fromCamera; // Pilih mode multi-page otomatis jika dari galeri
-
-    _scanController = AnimationController(
-      vsync: this,
-      duration: const Duration(seconds: 3),
-    )..repeat(reverse: true);
+    _isMultiPage = !widget.fromCamera; 
 
     _initializeCamera();
 
-    // Jalankan aksi otomatis pertama kali halaman dibuka jika dari galeri
     WidgetsBinding.instance.addPostFrameCallback((_) {
       if (!widget.fromCamera) {
         _importFromGallery();
@@ -71,7 +64,6 @@ class _ScannerPageState extends State<ScannerPage>
         return;
       }
 
-      // Cari kamera belakang
       final backCamera = cameras.firstWhere(
         (camera) => camera.lensDirection == CameraLensDirection.back,
         orElse: () => cameras.first,
@@ -80,12 +72,11 @@ class _ScannerPageState extends State<ScannerPage>
       final controller = CameraController(
         backCamera,
         ResolutionPreset.max,
-        enableAudio: false, // Menghindari meminta izin mikrofon
+        enableAudio: false, 
       );
 
       await controller.initialize();
       
-      // Aktifkan autofocus secara otomatis agar gambar teks tajam dan akurat untuk OCR
       try {
         await controller.setFocusMode(FocusMode.auto);
       } catch (e) {
@@ -107,6 +98,27 @@ class _ScannerPageState extends State<ScannerPage>
         });
         _showError('Gagal mengaktifkan kamera: $e');
       }
+    }
+  }
+
+  // Fungsi Baru: Menangani Tap to Focus berdasarkan titik sentuh layar
+  Future<void> _onTapToFocus(TapUpDetails details, BoxConstraints constraints) async {
+    if (_cameraController == null || !_cameraController!.value.isInitialized) return;
+
+    try {
+      // Menghitung titik koordinat relatif (0.0 sampai 1.0)
+      final double x = details.localPosition.dx / constraints.maxWidth;
+      final double y = details.localPosition.dy / constraints.maxHeight;
+      final Offset focusPoint = Offset(x, y);
+
+      // Set titik fokus dan set mode ke auto agar mengunci fokus di area tersebut
+      await _cameraController!.setFocusPoint(focusPoint);
+      await _cameraController!.setFocusMode(FocusMode.auto);
+
+      // Opsional: Tampilkan feedback singkat di debug console
+      debugPrint('Fokus diatur ke: $focusPoint');
+    } catch (e) {
+      debugPrint('Gagal mengatur manual fokus: $e');
     }
   }
 
@@ -146,8 +158,7 @@ class _ScannerPageState extends State<ScannerPage>
   void dispose() {
     WidgetsBinding.instance.removeObserver(this);
     _cameraController?.dispose();
-    _scanController.dispose();
-    super.dispose();
+    super.dispose(); // Menghapus _scanController.dispose()
   }
 
   Future<void> _captureImage() async {
@@ -162,10 +173,8 @@ class _ScannerPageState extends State<ScannerPage>
         });
 
         if (!_isMultiPage) {
-          // Mode single: langsung mulai proses
           await _startProcessing();
         } else {
-          // Mode multi: tampilkan toast pesan singkat
           if (mounted) {
             ScaffoldMessenger.of(context).showSnackBar(
               const SnackBar(
@@ -183,7 +192,6 @@ class _ScannerPageState extends State<ScannerPage>
         if (mounted) setState(() => _isPicking = false);
       }
     } else {
-      // Fallback ke ImagePicker jika kamera internal gagal diinisialisasi
       setState(() => _isPicking = true);
       try {
         final photo = await _picker.pickImage(
@@ -225,7 +233,6 @@ class _ScannerPageState extends State<ScannerPage>
 
     try {
       if (!_isMultiPage) {
-        // Mode single: pilih satu gambar saja
         final photo = await _picker.pickImage(
           source: ImageSource.gallery,
           imageQuality: 90,
@@ -235,7 +242,6 @@ class _ScannerPageState extends State<ScannerPage>
           await _startProcessing();
         }
       } else {
-        // Mode multi: pilih banyak gambar
         final assets = await AssetPicker.pickAssets(
           context,
           pickerConfig: AssetPickerConfig(
@@ -284,7 +290,6 @@ class _ScannerPageState extends State<ScannerPage>
 
     if (mounted) {
       if (_selectedPaths.length == 1) {
-        // Mode single: langsung arahkan ke EditPage untuk item ini
         final newlyScannedItem = provider.items.last;
         Navigator.pushReplacement(
           context,
@@ -296,7 +301,6 @@ class _ScannerPageState extends State<ScannerPage>
           ),
         );
       } else {
-        // Mode batch/multi: setelah selesai scan batch, kita kembali ke Dashboard tab Review
         Navigator.pushAndRemoveUntil(
           context,
           MaterialPageRoute(
@@ -322,7 +326,7 @@ class _ScannerPageState extends State<ScannerPage>
   void _showCapturedImagesSheet() {
     showModalBottomSheet(
       context: context,
-      backgroundColor: const Color(0xFF0A100D), // warna gelap mirip kamera
+      backgroundColor: const Color(0xFF0A100D), 
       shape: const RoundedRectangleBorder(
         borderRadius: BorderRadius.vertical(top: Radius.circular(24)),
       ),
@@ -343,7 +347,6 @@ class _ScannerPageState extends State<ScannerPage>
                           color: Colors.white,
                           fontSize: 16,
                           fontWeight: FontWeight.w700,
-                          fontFamily: 'Inter',
                         ),
                       ),
                       const Spacer(),
@@ -365,81 +368,89 @@ class _ScannerPageState extends State<ScannerPage>
                       ),
                     )
                   else
-                    SizedBox(
-                      height: 130,
-                      child: ListView.separated(
-                        scrollDirection: Axis.horizontal,
-                        itemCount: _selectedPaths.length,
-                        separatorBuilder: (_, _) => const SizedBox(width: 12),
-                        itemBuilder: (context, index) {
-                          return Stack(
-                            children: [
-                              ClipRRect(
-                                borderRadius: BorderRadius.circular(10),
-                                child: kIsWeb
-                                    ? Container(
-                                        width: 90,
-                                        height: 130,
-                                        color: Colors.grey.shade800,
-                                        child: const Center(
-                                          child: Icon(Icons.image_rounded, color: Colors.white70),
+                    CustomScrollView(
+                      shrinkWrap: true,
+                      physics: const NeverScrollableScrollPhysics(),
+                      slivers: [
+                        SliverToBoxAdapter(
+                          child: SizedBox(
+                            height: 130,
+                            child: ListView.separated(
+                              scrollDirection: Axis.horizontal,
+                              itemCount: _selectedPaths.length,
+                              separatorBuilder: (_, _) => const SizedBox(width: 12),
+                              itemBuilder: (context, index) {
+                                return Stack(
+                                  children: [
+                                    ClipRRect(
+                                      borderRadius: BorderRadius.circular(10),
+                                      child: kIsWeb
+                                          ? Container(
+                                              width: 90,
+                                              height: 130,
+                                              color: Colors.grey.shade800,
+                                              child: const Center(
+                                                child: Icon(Icons.image_rounded, color: Colors.white70),
+                                              ),
+                                            )
+                                          : Image.file(
+                                              File(_selectedPaths[index]),
+                                              width: 90,
+                                              height: 130,
+                                              fit: BoxFit.cover,
+                                            ),
+                                    ),
+                                    Positioned(
+                                      top: 4,
+                                      right: 4,
+                                      child: GestureDetector(
+                                        onTap: () {
+                                          setState(() => _removeImage(index));
+                                          setModalState(() {});
+                                          if (_selectedPaths.isEmpty) {
+                                            Navigator.pop(ctx);
+                                          }
+                                        },
+                                        child: Container(
+                                          decoration: const BoxDecoration(
+                                            color: Colors.black87,
+                                            shape: BoxShape.circle,
+                                          ),
+                                          padding: const EdgeInsets.all(4),
+                                          child: const Icon(
+                                            Icons.close_rounded,
+                                            color: Colors.white,
+                                            size: 14,
+                                          ),
                                         ),
-                                      )
-                                    : Image.file(
-                                        File(_selectedPaths[index]),
-                                        width: 90,
-                                        height: 130,
-                                        fit: BoxFit.cover,
                                       ),
-                              ),
-                              Positioned(
-                                top: 4,
-                                right: 4,
-                                child: GestureDetector(
-                                  onTap: () {
-                                    setState(() => _removeImage(index));
-                                    setModalState(() {});
-                                    if (_selectedPaths.isEmpty) {
-                                      Navigator.pop(ctx);
-                                    }
-                                  },
-                                  child: Container(
-                                    decoration: const BoxDecoration(
-                                      color: Colors.black87,
-                                      shape: BoxShape.circle,
                                     ),
-                                    padding: const EdgeInsets.all(4),
-                                    child: const Icon(
-                                      Icons.close_rounded,
-                                      color: Colors.white,
-                                      size: 14,
+                                    Positioned(
+                                      bottom: 4,
+                                      left: 4,
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
+                                        decoration: BoxDecoration(
+                                          color: const Color(0xFF004625),
+                                          borderRadius: BorderRadius.circular(6),
+                                        ),
+                                        child: Text(
+                                          '${index + 1}',
+                                          style: const TextStyle(
+                                            color: Colors.white,
+                                            fontSize: 10,
+                                            fontWeight: FontWeight.bold,
+                                          ),
+                                        ),
+                                      ),
                                     ),
-                                  ),
-                                ),
-                              ),
-                              Positioned(
-                                bottom: 4,
-                                left: 4,
-                                child: Container(
-                                  padding: const EdgeInsets.symmetric(horizontal: 6, vertical: 2),
-                                  decoration: BoxDecoration(
-                                    color: const Color(0xFF004625),
-                                    borderRadius: BorderRadius.circular(6),
-                                  ),
-                                  child: Text(
-                                    '${index + 1}',
-                                    style: const TextStyle(
-                                      color: Colors.white,
-                                      fontSize: 10,
-                                      fontWeight: FontWeight.bold,
-                                    ),
-                                  ),
-                                ),
-                              ),
-                            ],
-                          );
-                        },
-                      ),
+                                  ],
+                                );
+                              },
+                            ),
+                          ),
+                        )
+                      ],
                     ),
                   const SizedBox(height: 24),
                   if (_selectedPaths.isNotEmpty)
@@ -477,9 +488,9 @@ class _ScannerPageState extends State<ScannerPage>
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFF1E5E3A), // UIN Green theme background
+      backgroundColor: const Color(0xFF1E5E3A), 
       appBar: AppBar(
-        backgroundColor: const Color(0xFF1E5E3A), // UIN Green theme appBar
+        backgroundColor: const Color(0xFF1E5E3A), 
         foregroundColor: Colors.white,
         title: const Text(
           'Pindai Sampul',
@@ -506,7 +517,6 @@ class _ScannerPageState extends State<ScannerPage>
       ),
       body: Column(
         children: [
-          // Preview Kamera Terintegrasi
           Expanded(
             child: Container(
               color: const Color(0xFF070B08),
@@ -521,101 +531,64 @@ class _ScannerPageState extends State<ScannerPage>
                         return Center(
                           child: AspectRatio(
                             aspectRatio: cameraRatio,
-                            child: Stack(
-                              alignment: Alignment.center,
-                              children: [
-                                // Camera Preview
-                                CameraPreview(_cameraController!),
+                            child: GestureDetector(
+                              // Implementasi Tap to Focus di sini
+                              onTapUp: (details) => _onTapToFocus(details, constraints),
+                              child: Stack(
+                                alignment: Alignment.center,
+                                children: [
+                                  CameraPreview(_cameraController!),
 
-                                // Garis bantu pemosisian gambar (grid)
-                                Positioned.fill(
-                                  child: CustomPaint(
-                                    painter: _GridPainter(),
+                                  Positioned.fill(
+                                    child: CustomPaint(
+                                      painter: _GridPainter(),
+                                    ),
                                   ),
-                                ),
 
-                                // Bingkai penanda letak dokumen (di dalam AspectRatio agar selaras)
-                                Padding(
-                                  padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
-                                  child: Stack(
-                                    children: [
-                                      // Kotak dengan garis putus-putus
-                                      Container(
-                                        decoration: BoxDecoration(
-                                          border: Border.all(
-                                            color: Colors.white.withOpacity(0.3),
-                                            width: 1.5,
-                                          ),
-                                          borderRadius: BorderRadius.circular(16),
-                                        ),
-                                      ),
-
-                                      // Siku-siku di setiap sudut bingkai
-                                      const Positioned(top: 0, left: 0, child: _CornerBracket(top: true, left: true)),
-                                      const Positioned(top: 0, right: 0, child: _CornerBracket(top: true, left: false)),
-                                      const Positioned(bottom: 0, left: 0, child: _CornerBracket(top: false, left: true)),
-                                      const Positioned(bottom: 0, right: 0, child: _CornerBracket(top: false, left: false)),
-
-                                      // Animasi garis laser scan
-                                      Positioned.fill(
-                                        child: ClipRRect(
-                                          borderRadius: BorderRadius.circular(16),
-                                          child: AnimatedBuilder(
-                                            animation: _scanController,
-                                            builder: (context, child) {
-                                              return Align(
-                                                alignment: Alignment(0.0, -1.0 + (_scanController.value * 2.0)),
-                                                child: child!,
-                                              );
-                                            },
-                                            child: Container(
-                                              height: 3,
-                                              width: double.infinity,
-                                              decoration: BoxDecoration(
-                                                gradient: LinearGradient(
-                                                  colors: [
-                                                    Colors.transparent,
-                                                    const Color(0xFFFCBF48).withOpacity(0.9),
-                                                    Colors.transparent,
-                                                  ],
-                                                ),
-                                                boxShadow: [
-                                                  BoxShadow(
-                                                    color: const Color(0xFFFCBF48).withOpacity(0.5),
-                                                    blurRadius: 8,
-                                                    spreadRadius: 1,
-                                                  ),
-                                                ],
-                                              ),
+                                  Padding(
+                                    padding: const EdgeInsets.symmetric(horizontal: 32.0, vertical: 48.0),
+                                    child: Stack(
+                                      children: [
+                                        Container(
+                                          decoration: BoxDecoration(
+                                            border: Border.all(
+                                              color: Colors.white.withOpacity(0.3),
+                                              width: 1.5,
                                             ),
+                                            borderRadius: BorderRadius.circular(16),
                                           ),
                                         ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
 
-                                // Teks petunjuk di atas kamera
-                                Positioned(
-                                  top: 16,
-                                  child: Container(
-                                    padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
-                                    decoration: BoxDecoration(
-                                      color: Colors.black.withOpacity(0.6),
-                                      borderRadius: BorderRadius.circular(20),
+                                        const Positioned(top: 0, left: 0, child: _CornerBracket(top: true, left: true)),
+                                        const Positioned(top: 0, right: 0, child: _CornerBracket(top: true, left: false)),
+                                        const Positioned(bottom: 0, left: 0, child: _CornerBracket(top: false, left: true)),
+                                        const Positioned(bottom: 0, right: 0, child: _CornerBracket(top: false, left: false)),
+                                        
+                                        // Animasi laser lama di sini sudah dihapus sepenuhnya
+                                      ],
                                     ),
-                                    child: const Text(
-                                      'Posisikan cover skripsi di dalam bingkai',
-                                      style: TextStyle(
-                                        color: Colors.white,
-                                        fontSize: 11,
-                                        fontWeight: FontWeight.w600,
-                                        fontFamily: 'Inter',
+                                  ),
+
+                                  Positioned(
+                                    top: 16,
+                                    child: Container(
+                                      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 6),
+                                      decoration: BoxDecoration(
+                                        color: Colors.black.withOpacity(0.6),
+                                        borderRadius: BorderRadius.circular(20),
+                                      ),
+                                      child: const Text(
+                                        'Sentuh layar untuk fokus • Posisikan cover di dalam bingkai',
+                                        style: TextStyle(
+                                          color: Colors.white,
+                                          fontSize: 11,
+                                          fontWeight: FontWeight.w600,
+                                        ),
                                       ),
                                     ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         );
@@ -651,14 +624,12 @@ class _ScannerPageState extends State<ScannerPage>
             ),
           ),
 
-          // Area tombol shutter kamera
           Container(
-            color: const Color(0xFF133C25), // Match UIN Dark Green bottom theme
+            color: const Color(0xFF133C25), 
             padding: const EdgeInsets.fromLTRB(24, 20, 24, 40),
             child: Column(
               mainAxisSize: MainAxisSize.min,
               children: [
-                // Switch pilihan mode scan
                 Container(
                   padding: const EdgeInsets.all(4),
                   decoration: BoxDecoration(
@@ -683,17 +654,11 @@ class _ScannerPageState extends State<ScannerPage>
                 ),
                 const SizedBox(height: 24),
 
-                // Baris tombol kontrol utama
                 Row(
                   mainAxisAlignment: MainAxisAlignment.spaceBetween,
                   children: [
-                    // Tombol Galeri (Kiri)
                     _buildGalleryButton(),
-
-                    // Tombol Jepret Foto (Tengah)
                     _buildShutterButton(),
-
-                    // Tombol Selesai / Review (Kanan)
                     _buildReviewDoneButton(),
                   ],
                 ),
@@ -705,6 +670,7 @@ class _ScannerPageState extends State<ScannerPage>
     );
   }
 
+  // Widget helper bawaan tetap dipertahankan di bawah...
   Widget _buildModeToggleItem({
     required String label,
     required bool active,
@@ -725,7 +691,6 @@ class _ScannerPageState extends State<ScannerPage>
             color: active ? const Color(0xFF004625) : Colors.white70,
             fontSize: 12,
             fontWeight: FontWeight.w700,
-            fontFamily: 'Inter',
           ),
         ),
       ),
@@ -751,7 +716,6 @@ class _ScannerPageState extends State<ScannerPage>
             color: Colors.white70,
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
           ),
         ),
       ],
@@ -772,7 +736,7 @@ class _ScannerPageState extends State<ScannerPage>
         child: Container(
           decoration: const BoxDecoration(
             shape: BoxShape.circle,
-            color: Color(0xFFFCBF48), // Tombol shutter warna emas
+            color: Color(0xFFFCBF48), 
           ),
           child: const Icon(Icons.camera_alt_rounded, color: Color(0xFF004625), size: 28),
         ),
@@ -845,7 +809,6 @@ class _ScannerPageState extends State<ScannerPage>
             color: hasImages ? Colors.white : Colors.grey,
             fontSize: 11,
             fontWeight: FontWeight.w600,
-            fontFamily: 'Inter',
           ),
         ),
       ],
@@ -860,7 +823,6 @@ class _GridPainter extends CustomPainter {
       ..color = Colors.white.withOpacity(0.08)
       ..strokeWidth = 1.0;
 
-    // Menggambar garis bantu grid
     canvas.drawLine(Offset(size.width / 3, 0), Offset(size.width / 3, size.height), paint);
     canvas.drawLine(Offset(size.width * 2 / 3, 0), Offset(size.width * 2 / 3, size.height), paint);
 
