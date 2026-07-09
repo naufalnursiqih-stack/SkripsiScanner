@@ -1,0 +1,109 @@
+Analyzing finalproject...                                       
+
+   info - The imported package 'flutter_image_compress' isn't a dependency of the importing package - lib\core\utils\image_processor.dart:6:8 - depend_on_referenced_packages
+  error - Target of URI doesn't exist: 'package:flutter_image_compress/flutter_image_compress.dart' - lib\core\utils\image_processor.dart:6:8 - uri_does_not_exist
+  error - Undefined name 'FlutterImageCompress' - lib\core\utils\image_processor.dart:17:28 - undefined_identifier
+   info - Invalid regular expression syntax - lib\core\utils\regex_helper.dart:17:5 - valid_regexps
+  error - Expected to find ')' - lib\core\utils\regex_helper.dart:17:61 - expected_token
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:17:68 - expected_token
+  error - Expected a class member - lib\core\utils\regex_helper.dart:17:69 - expected_class_member
+  error - Unterminated string literal - lib\core\utils\regex_helper.dart:17:70 - unterminated_string_literal
+   info - An uninitialized field should have an explicit type annotation - lib\core\utils\regex_helper.dart:18:5 - prefer_typing_uninitialized_variables
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:18:5 - strict_top_level_inference
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:18:5 - expected_token
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name - lib\core\utils\regex_helper.dart:18:5 - missing_const_final_var_or_type
+  error - Expected a class member - lib\core\utils\regex_helper.dart:18:18 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:18:20 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:18:25 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:19:3 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:19:4 - expected_class_member
+   info - Invalid regular expression syntax - lib\core\utils\regex_helper.dart:22:5 - valid_regexps
+  error - Expected to find ')' - lib\core\utils\regex_helper.dart:22:24 - expected_token
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:22:31 - expected_token
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:32 - expected_class_member
+   info - An uninitialized field should have an explicit type annotation - lib\core\utils\regex_helper.dart:22:33 - prefer_typing_uninitialized_variables
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:33 - strict_top_level_inference
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:22:33 - expected_token
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name - lib\core\utils\regex_helper.dart:22:33 - missing_const_final_var_or_type
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:34 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters - lib\core\utils\regex_helper.dart:22:34 - missing_method_parameters
+  error - Operator '*' should declare exactly 1 parameters, but 0 found - lib\core\utils\regex_helper.dart:22:34 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator' - lib\core\utils\regex_helper.dart:22:34 - missing_keyword_operator
+  error - A function body must be provided - lib\core\utils\regex_helper.dart:22:35 - missing_function_body
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:35 - expected_class_member
+   info - An uninitialized field should have an explicit type annotation - lib\core\utils\regex_helper.dart:22:36 - prefer_typing_uninitialized_variables
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:36 - strict_top_level_inference
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:22:36 - expected_token
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name - lib\core\utils\regex_helper.dart:22:36 - missing_const_final_var_or_type
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:37 - expected_class_member
+  error - s isn't a type - lib\core\utils\regex_helper.dart:22:38 - not_a_type
+  error - Operator declarations must be preceded by the keyword 'operator' - lib\core\utils\regex_helper.dart:22:39 - missing_keyword_operator
+  error - The name '*' is already defined - lib\core\utils\regex_helper.dart:22:39 - duplicate_definition
+  error - Expected an identifier - lib\core\utils\regex_helper.dart:22:41 - missing_identifier
+  error - Named parameters must be enclosed in curly braces ('{' and '}') - lib\core\utils\regex_helper.dart:22:42 - named_parameter_outside_group
+  error - Optional parameters aren't allowed when defining an operator - lib\core\utils\regex_helper.dart:22:42 - optional_parameter_in_operator
+  error - Using a colon as the separator before a default value is no longer supported - lib\core\utils\regex_helper.dart:22:42 - obsolete_colon_for_default_value
+  error - Undefined name 'NIM' - lib\core\utils\regex_helper.dart:22:43 - undefined_identifier
+  error - Undefined name 'NPM' - lib\core\utils\regex_helper.dart:22:47 - undefined_identifier
+  error - Undefined name 'NRP' - lib\core\utils\regex_helper.dart:22:51 - undefined_identifier
+  error - A function body must be provided - lib\core\utils\regex_helper.dart:22:55 - missing_function_body
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:55 - expected_class_member
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:56 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters - lib\core\utils\regex_helper.dart:22:56 - missing_method_parameters
+  error - Operator '^' should declare exactly 1 parameters, but 0 found - lib\core\utils\regex_helper.dart:22:56 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator' - lib\core\utils\regex_helper.dart:22:56 - missing_keyword_operator
+  error - A function body must be provided - lib\core\utils\regex_helper.dart:22:57 - missing_function_body
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:57 - expected_class_member
+   info - An uninitialized field should have an explicit type annotation - lib\core\utils\regex_helper.dart:22:58 - prefer_typing_uninitialized_variables
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:58 - strict_top_level_inference
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:22:58 - expected_token
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name - lib\core\utils\regex_helper.dart:22:58 - missing_const_final_var_or_type
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:59 - expected_class_member
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:60 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters - lib\core\utils\regex_helper.dart:22:60 - missing_method_parameters
+  error - Operator '*' should declare exactly 1 parameters, but 0 found - lib\core\utils\regex_helper.dart:22:60 - wrong_number_of_parameters_for_operator
+  error - Operator declarations must be preceded by the keyword 'operator' - lib\core\utils\regex_helper.dart:22:60 - missing_keyword_operator
+  error - The name '*' is already defined - lib\core\utils\regex_helper.dart:22:60 - duplicate_definition
+  error - A function body must be provided - lib\core\utils\regex_helper.dart:22:61 - missing_function_body
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:61 - expected_class_member
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:22:62 - strict_top_level_inference
+  error - Methods must have an explicit list of parameters - lib\core\utils\regex_helper.dart:22:62 - missing_method_parameters
+  error - The name 'd' is already defined - lib\core\utils\regex_helper.dart:22:62 - duplicate_definition
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:22:64 - expected_token
+  error - Expected an identifier - lib\core\utils\regex_helper.dart:22:66 - missing_identifier
+  error - Unexpected text ';' - lib\core\utils\regex_helper.dart:22:66 - unexpected_token
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:22:67 - expected_token
+  error - Expected a class member - lib\core\utils\regex_helper.dart:22:70 - expected_class_member
+  error - Unterminated string literal - lib\core\utils\regex_helper.dart:22:71 - unterminated_string_literal
+   info - An uninitialized field should have an explicit type annotation - lib\core\utils\regex_helper.dart:23:5 - prefer_typing_uninitialized_variables
+   info - Missing type annotation - lib\core\utils\regex_helper.dart:23:5 - strict_top_level_inference
+  error - Expected to find ';' - lib\core\utils\regex_helper.dart:23:5 - expected_token
+  error - The name 'caseSensitive' is already defined - lib\core\utils\regex_helper.dart:23:5 - duplicate_definition
+  error - Variables must be declared using the keywords 'const', 'final', 'var' or a type name - lib\core\utils\regex_helper.dart:23:5 - missing_const_final_var_or_type
+  error - Expected a class member - lib\core\utils\regex_helper.dart:23:18 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:23:20 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:23:25 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:24:3 - expected_class_member
+  error - Expected a class member - lib\core\utils\regex_helper.dart:24:4 - expected_class_member
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\home_page.dart:49:48 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\home_page.dart:250:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\home_page.dart:261:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\home_page.dart:275:58 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\home_page.dart:279:71 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\presentation\pages\review_page.dart:121:29 - unnecessary_underscores
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\review_page.dart:144:33 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\review_page.dart:202:59 - deprecated_member_use
+   info - Don't use 'BuildContext's across async gaps, guarded by an unrelated 'mounted' check - lib\presentation\pages\review_page.dart:351:28 - use_build_context_synchronously
+  error - Evaluation of this constant expression throws an exception - lib\presentation\pages\scanner_page.dart:46:23 - const_eval_throws_exception
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\scanner_page.dart:271:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\pages\scanner_page.dart:271:37 - deprecated_member_use
+warning - Unused import: 'dart:io' - lib\presentation\providers\scan_provider.dart:3:8 - unused_import
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\thesis_card.dart:30:44 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\thesis_card.dart:97:37 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\thesis_card.dart:103:36 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\thesis_card.dart:109:40 - deprecated_member_use
+   info - 'withOpacity' is deprecated and shouldn't be used. Use .withValues() to avoid precision loss - lib\presentation\widgets\thesis_card.dart:115:37 - deprecated_member_use
+   info - Unnecessary use of multiple underscores - lib\presentation\widgets\thesis_card.dart:144:27 - unnecessary_underscores
+   info - Unnecessary use of multiple underscores - lib\presentation\widgets\thesis_card.dart:144:31 - unnecessary_underscores
+  error - The name 'MyApp' isn't a class - test\widget_test.dart:16:35 - creation_with_non_type
+

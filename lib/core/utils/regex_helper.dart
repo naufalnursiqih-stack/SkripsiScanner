@@ -6,7 +6,7 @@ class RegexHelper {
   // ─── NIM ────────────────────────────────────────────────────────────────────
   // Matches 10–12 consecutive digits, often prefixed by "NIM", "NPM", etc.
   static final _nimPrefixed = RegExp(
-    r'(?:NIM|NPM|NRP|NIRM)[^\d]*(\d{10,12})',
+    r'NIM[^\d]*(\d{10,12})',
     caseSensitive: false,
   );
   static final _nimBare = RegExp(r'\b(\d{10,12})\b');
@@ -19,13 +19,13 @@ class RegexHelper {
   );
   // Name line that appears just ABOVE or BELOW a NIM line (heuristic fallback)
   static final _nameNearNim = RegExp(
-    r"([A-Z][a-zA-Z .']{3,60})\s*\n\s*(?:NIM|NPM|NRP)[^\d]*\d{10,12}",
+    r"([A-Z][a-zA-Z .']{3,60})\s*\n\s*NIM[^\d]*\d{10,12}",
     caseSensitive: false,
   );
 
   // ─── Major ──────────────────────────────────────────────────────────────────
   static final _majorPrefixed = RegExp(
-    r'(?:Program\s+Studi|Jurusan|Departemen|Prodi)\s*[:\-]?\s*([^\n]{5,80})',
+    r'(?:Program\s+Studi|Jurusan|Prodi)\s*[:\-]?\s*([^\n]{5,80})',
     caseSensitive: false,
   );
 
@@ -40,7 +40,7 @@ class RegexHelper {
 
   // ─── University ──────────────────────────────────────────────────────────────
   static final _university = RegExp(
-    r'(?:Universitas|Institut|Sekolah Tinggi|Politeknik|STMIK|STIE|STIKES)[^\n]{2,60}',
+    r'(?:Universitas Islam Negeri|UIN Alauddin Makassar|UIN|Universitas)[^\n]{2,60}',
     caseSensitive: false,
   );
 
