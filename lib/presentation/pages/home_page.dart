@@ -1,6 +1,5 @@
-// lib/presentation/pages/home_page.dart
-
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import 'package:wechat_assets_picker/wechat_assets_picker.dart';
 import '../providers/scan_provider.dart';
@@ -24,11 +23,12 @@ class _HomePageState extends State<HomePage> {
   bool _isSelectionMode = false;
   final Set<String> _selectedItemIds = {};
 
-  // Konstanta Desain Global untuk Harmonisasi Visual
-  static const double _globalRadius = 16.0; // Poin 2: Konsistensi Corner Radius
-  static const Color _uinGreen = Color(0xFF1E5E3A);
+  // Konstanta Desain Global sesuai UI mockup gambar
+  static const double _globalRadius = 16.0; 
+  static const Color _uinGreen = Color(0xFF1E5E3A); // Disamakan dengan warna hijau halaman lainnya
   static const Color _uinGold = Color(0xFFFCBF48);
-  static const Color _cardBgDark = Color(0xFF133C25);
+  static const Color _cardBgDark = Color(0xFF144627); // Warna hijau kontainer tombol utama
+  static const Color _actionIconBg = Color(0xFFEAB308); // Warna kuning emas ikon box atas
 
   @override
   void dispose() {
@@ -56,11 +56,6 @@ class _HomePageState extends State<HomePage> {
       backgroundColor: _uinGreen,
       body: Stack(
         children: [
-          Positioned.fill(
-            child: CustomPaint(
-              painter: _DotGridPainter(),
-            ),
-          ),
           SafeArea(
             child: Column(
               children: [
@@ -71,14 +66,10 @@ class _HomePageState extends State<HomePage> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        // Poin 3: Tombol Aksi Utama naik ke atas (Hierarki Pertama setelah App Bar)
                         _buildActionGrid(context),
-                        const SizedBox(height: 24),
-
+                        const SizedBox(height: 20),
                         _buildStatsRow(context),
                         const SizedBox(height: 28),
-                        
-                        // Riwayat Aktivitas beserta Search Bar di dalamnya
                         _buildRecentActivitySection(context),
                         const SizedBox(height: 24),
                       ],
@@ -95,6 +86,7 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 1. Bagian Atas: Teks rata kiri + Lonceng Notifikasi di pojok kanan (Bebas Error Const)
   Widget _buildTopAppBar(BuildContext context, ScanProvider provider) {
     final items = provider.items;
 
@@ -103,7 +95,7 @@ class _HomePageState extends State<HomePage> {
         height: 64,
         width: double.infinity,
         padding: const EdgeInsets.symmetric(horizontal: 16),
-        color: _cardBgDark,
+        color: const Color(0xFF133C25),
         child: Row(
           children: [
             IconButton(
@@ -125,7 +117,6 @@ class _HomePageState extends State<HomePage> {
                 fontSize: 18,
                 fontWeight: FontWeight.bold,
                 color: Colors.white,
-                fontFamily: 'Inter',
               ),
             ),
             const Spacer(),
@@ -145,7 +136,6 @@ class _HomePageState extends State<HomePage> {
                 style: const TextStyle(
                   color: _uinGold,
                   fontWeight: FontWeight.bold,
-                  fontFamily: 'Inter',
                 ),
               ),
             ),
@@ -175,57 +165,62 @@ class _HomePageState extends State<HomePage> {
     }
 
     return Container(
-      height: 64,
-      width: double.infinity,
-      padding: const EdgeInsets.symmetric(horizontal: 16),
+      padding: const EdgeInsets.only(left: 20, right: 20, top: 16, bottom: 8),
       color: Colors.transparent,
-      child: const Center(
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center,
-          children: [
-            Text(
-              'SkripsiScan',
-              style: TextStyle(
-                fontSize: 22,
-                fontWeight: FontWeight.bold,
-                color: Colors.white,
-                fontFamily: 'Inter',
-                letterSpacing: -0.5,
+      child: Row(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        crossAxisAlignment: CrossAxisAlignment.center,
+        children: [
+          Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              Text(
+                'SkripsiScan',
+                style: TextStyle(
+                  fontSize: 26,
+                  fontWeight: FontWeight.bold,
+                  color: Colors.white,
+                  letterSpacing: -0.5,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
               ),
-            ),
-            Text(
-              'Selamat Datang',
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.white70,
-                fontWeight: FontWeight.w500,
-                fontFamily: 'Inter',
+              const SizedBox(height: 4),
+              Row(
+                children: [
+                  Text(
+                    'Selamat Datang ',
+                    style: const TextStyle(
+                      fontSize: 16,
+                      color: Colors.white70,
+                      fontWeight: FontWeight.w500,
+                    ),
+                  ),
+                  const Text('👋', style: TextStyle(fontSize: 16)),
+                ],
               ),
-            ),
-          ],
-        ),
+            ],
+          ),
+        ],
       ),
     );
   }
 
-  // Poin 3: Search bar dimodifikasi agar harmonis dan diletakkan di atas list aktivitas
   Widget _buildSearchBar(BuildContext context) {
     return Container(
       clipBehavior: Clip.antiAlias,
       decoration: BoxDecoration(
-        color: Colors.white,
-        borderRadius: BorderRadius.circular(_globalRadius), // Poin 2: Mengikuti radius global
+        color: const Color(0xFF114223),
+        borderRadius: BorderRadius.circular(24),
         border: Border.all(
-          color: const Color(0xFFBEC9C2).withOpacity(0.3),
+          color: const Color(0xFFBEC9C2).withOpacity(0.1),
           width: 1.0,
         ),
       ),
       child: TextField(
         controller: _searchController,
         style: const TextStyle(
-          color: Color(0xFF191C1E),
+          color: Colors.white,
           fontSize: 14,
-          fontFamily: 'Inter',
         ),
         onChanged: (value) {
           setState(() {
@@ -237,17 +232,16 @@ class _HomePageState extends State<HomePage> {
           fillColor: Colors.transparent,
           hintText: 'Cari riwayat dokumen...',
           hintStyle: const TextStyle(
-            color: Color(0xFF6F7973),
+            color: Colors.white60,
             fontSize: 14,
-            fontFamily: 'Inter',
           ),
           prefixIcon: const Icon(
             Icons.search_rounded,
-            color: Color(0xFF6F7973),
+            color: Colors.white60,
           ),
           suffixIcon: _searchQuery.isNotEmpty
               ? IconButton(
-                  icon: const Icon(Icons.clear_rounded, color: Color(0xFF6F7973)),
+                  icon: const Icon(Icons.clear_rounded, color: Colors.white60),
                   onPressed: () {
                     _searchController.clear();
                     setState(() {
@@ -266,166 +260,192 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
+  // 2. Statistik: Box putih utuh tunggal dibagi 3 kolom dengan Divider garis vertikal tipis
   Widget _buildStatsRow(BuildContext context) {
-    return Consumer<ScanProvider>(
-      builder: (context, provider, _) {
-        return Row(
-          children: [
-            _StatCard(
-              label: 'TOTAL SCAN',
-              value: '${provider.items.length}',
-              icon: Icons.search_rounded,
-              iconBgColor: const Color(0xFFEAF0EC),
-              iconColor: _uinGreen,
-              valueColor: _uinGreen,
-              globalRadius: _globalRadius, // Poin 2
-            ),
-            const SizedBox(width: 8),
-            _StatCard(
-              label: 'BERHASIL',
-              value: '${provider.successItems.length}',
-              icon: Icons.check_circle_rounded,
-              iconBgColor: const Color(0xFFD1FAE5),
-              iconColor: const Color(0xFF059669),
-              valueColor: const Color(0xFF059669),
-              globalRadius: _globalRadius, // Poin 2
-            ),
-            const SizedBox(width: 8),
-            _StatCard(
-              label: 'GAGAL',
-              value: '${provider.failedItems.length}',
-              icon: Icons.cancel_rounded,
-              iconBgColor: const Color(0xFFFFE4E6),
-              iconColor: const Color(0xFFE11D48),
-              valueColor: const Color(0xFFE11D48),
-              globalRadius: _globalRadius, // Poin 2
-            ),
-          ],
-        );
-      },
+    return Container(
+      decoration: BoxDecoration(
+        color: Colors.white,
+        borderRadius: BorderRadius.circular(_globalRadius),
+        boxShadow: [
+          BoxShadow(
+            color: Colors.black.withOpacity(0.05),
+            blurRadius: 10,
+            offset: const Offset(0, 4),
+          ),
+        ],
+      ),
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Consumer<ScanProvider>(
+        builder: (context, provider, _) {
+          return Row(
+            children: [
+              Expanded(
+                child: _buildSingleStatItem(
+                  label: 'TOTAL SCAN',
+                  value: '${provider.items.length}',
+                  icon: Icons.search,
+                  iconBgColor: const Color(0xFFEAF5EE),
+                  iconColor: const Color(0xFF0C3A1D),
+                  valueColor: const Color(0xFF0C3A1D),
+                ),
+              ),
+              Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.2)),
+              Expanded(
+                child: _buildSingleStatItem(
+                  label: 'BERHASIL',
+                  value: '${provider.successItems.length}',
+                  icon: Icons.check_circle_rounded,
+                  iconBgColor: const Color(0xFFE6F7ED),
+                  iconColor: const Color(0xFF10B981),
+                  valueColor: const Color(0xFF10B981),
+                ),
+              ),
+              Container(width: 1, height: 40, color: Colors.grey.withOpacity(0.2)),
+              Expanded(
+                child: _buildSingleStatItem(
+                  label: 'GAGAL',
+                  value: '${provider.failedItems.length}',
+                  icon: Icons.cancel_rounded,
+                  iconBgColor: const Color(0xFFFFEAEB),
+                  iconColor: const Color(0xFFEF4444),
+                  valueColor: const Color(0xFFEF4444),
+                ),
+              ),
+            ],
+          );
+        },
+      ),
     );
   }
 
-  Widget _buildActionGrid(BuildContext context) {
-    return Row(
+  Widget _buildSingleStatItem({
+    required String label,
+    required String value,
+    required IconData icon,
+    required Color iconBgColor,
+    required Color iconColor,
+    required Color valueColor,
+  }) {
+    return Column(
+      mainAxisSize: MainAxisSize.min,
       children: [
-        // ====== TOMBOL IMPORT GAMBAR ======
-        Expanded(
-          child: AspectRatio(
-            aspectRatio: 1.0,
-            child: InkWell(
-              onTap: () => _importFromGalleryDirect(context),
-              borderRadius: BorderRadius.circular(_globalRadius),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: _cardBgDark,
-                  borderRadius: BorderRadius.circular(_globalRadius), // Poin 2: Diubah ke 16.0
-                  border: Border.all(
-                    color: _uinGold.withOpacity(0.4),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: _uinGold.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.image_outlined,
-                        color: _uinGold,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(height: 8), // Poin 4: Jarak dirapatkan dari 12 ke 8 agar padat
-                    const Text(
-                      'Import Gambar',
-                      style: TextStyle(
-                        color: Colors.white, // Poin 1: Diubah ke Putih Bersih demi Aksesibilitas
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        Container(
+          width: 36,
+          height: 36,
+          decoration: BoxDecoration(
+            color: iconBgColor,
+            shape: BoxShape.circle,
+          ),
+          child: Icon(icon, color: iconColor, size: 20),
+        ),
+        const SizedBox(height: 8),
+        Text(
+          label,
+          style: const TextStyle(
+            fontSize: 10,
+            fontWeight: FontWeight.bold,
+            color: Colors.grey,
+            letterSpacing: 0.3,
           ),
         ),
-        const SizedBox(width: 16),
-        
-        // ====== TOMBOL SCAN KAMERA ======
-        Expanded(
-          child: AspectRatio(
-            aspectRatio: 1.0,
-            child: InkWell(
-              onTap: () => _navigateToScanner(context, fromCamera: true),
-              borderRadius: BorderRadius.circular(_globalRadius),
-              child: Container(
-                decoration: BoxDecoration(
-                  color: _cardBgDark,
-                  borderRadius: BorderRadius.circular(_globalRadius), // Poin 2: Diubah ke 16.0
-                  border: Border.all(
-                    color: _uinGold.withOpacity(0.4),
-                    width: 1.5,
-                  ),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.15),
-                      blurRadius: 10,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
-                ),
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                      width: 48,
-                      height: 48,
-                      decoration: BoxDecoration(
-                        color: _uinGold.withOpacity(0.15),
-                        borderRadius: BorderRadius.circular(12),
-                      ),
-                      child: const Icon(
-                        Icons.photo_camera_outlined,
-                        color: _uinGold,
-                        size: 28,
-                      ),
-                    ),
-                    const SizedBox(height: 8), // Poin 4: Jarak dirapatkan dari 12 ke 8 agar padat
-                    const Text(
-                      'Scan Kamera',
-                      style: TextStyle(
-                        color: Colors.white, // Poin 1: Diubah ke Putih Bersih demi Aksesibilitas
-                        fontSize: 13,
-                        fontWeight: FontWeight.bold,
-                        fontFamily: 'Inter',
-                      ),
-                    ),
-                  ],
-                ),
-              ),
-            ),
+        const SizedBox(height: 4),
+        Text(
+          value,
+          style: TextStyle(
+            fontSize: 22,
+            fontWeight: FontWeight.bold,
+            color: valueColor,
           ),
         ),
       ],
     );
   }
 
-  // Poin 3 & Heuristic Layout: Penggabungan Search Bar ke dalam konteks Aktivitas Terakhir
+  // 3. Tombol Utama Grid: Kotak vertikal berlatar hijau tua, berikon kuning, berpanah pojok kanan bawah
+  Widget _buildActionGrid(BuildContext context) {
+    return Row(
+      children: [
+        Expanded(
+          child: _buildActionButton(
+            title: 'Scan Kamera',
+            description: 'Scan cover secara langsung',
+            icon: Icons.camera_alt_outlined,
+            onTap: () => _navigateToScanner(context, fromCamera: true),
+          ),
+        ),
+        const SizedBox(width: 16),
+        Expanded(
+          child: _buildActionButton(
+            title: 'Import dari Galeri',
+            description: 'Pilih gambar dari galeri',
+            icon: Icons.image_outlined,
+            onTap: () => _importFromGalleryDirect(context),
+          ),
+        ),
+      ],
+    );
+  }
+
+  Widget _buildActionButton({
+    required String title,
+    required String description,
+    required IconData icon,
+    required VoidCallback onTap,
+  }) {
+    return InkWell(
+      onTap: onTap,
+      borderRadius: BorderRadius.circular(_globalRadius),
+      child: Container(
+        padding: const EdgeInsets.all(16),
+        height: 175,
+        decoration: BoxDecoration(
+          color: _cardBgDark,
+          borderRadius: BorderRadius.circular(_globalRadius),
+        ),
+        child: Column(
+          crossAxisAlignment: CrossAxisAlignment.start,
+          children: [
+            Container(
+              width: 44,
+              height: 44,
+              decoration: BoxDecoration(
+                color: _actionIconBg,
+                borderRadius: BorderRadius.circular(12),
+              ),
+              child: Icon(icon, color: const Color(0xFF0C3A1D), size: 24),
+            ),
+            const Spacer(),
+            Text(
+              title,
+              style: const TextStyle(
+                color: Colors.white,
+                fontSize: 15,
+                fontWeight: FontWeight.bold,
+              ),
+            ),
+            const SizedBox(height: 4),
+            Text(
+              description,
+              style: const TextStyle(
+                color: Colors.white60,
+                fontSize: 10,
+              ),
+            ),
+            const SizedBox(height: 4),
+            const Align(
+              alignment: Alignment.bottomRight,
+              child: Icon(
+                Icons.arrow_forward_rounded,
+                color: Colors.amber,
+                size: 18,
+              ),
+            )
+          ],
+        ),
+      ),
+    );
+  }
+
   Widget _buildRecentActivitySection(BuildContext context) {
     final shellState = context.findAncestorStateOfType<DashboardShellState>();
     
@@ -433,8 +453,8 @@ class _HomePageState extends State<HomePage> {
       builder: (context, provider, _) {
         final List<ThesisModel> displayItems;
         if (_searchQuery.isEmpty) {
-          final rawRecent = provider.items.length > 2
-              ? provider.items.sublist(provider.items.length - 2)
+          final rawRecent = provider.items.length > 3
+              ? provider.items.sublist(provider.items.length - 3)
               : provider.items;
           displayItems = rawRecent.reversed.toList();
         } else {
@@ -453,13 +473,13 @@ class _HomePageState extends State<HomePage> {
             Row(
               mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                const Text(
+                Text(
                   'Aktivitas Terakhir',
                   style: TextStyle(
                     fontSize: 18,
                     fontWeight: FontWeight.w600,
                     color: Colors.white,
-                    fontFamily: 'Inter',
+                    fontFamily: GoogleFonts.poppins().fontFamily,
                   ),
                 ),
                 TextButton(
@@ -473,21 +493,23 @@ class _HomePageState extends State<HomePage> {
                       );
                     }
                   },
-                  child: const Text(
-                    'Lihat Semua',
-                    style: TextStyle(
-                      fontSize: 12,
-                      fontWeight: FontWeight.bold,
-                      color: _uinGold,
-                      fontFamily: 'Inter',
-                    ),
+                  child: const Row(
+                    children: [
+                      Text(
+                        'Lihat Semua ',
+                        style: TextStyle(
+                          fontSize: 12,
+                          fontWeight: FontWeight.bold,
+                          color: _uinGold,
+                        ),
+                      ),
+                      Icon(Icons.arrow_forward_ios_rounded, size: 12, color: _uinGold),
+                    ],
                   ),
                 ),
               ],
             ),
-            const SizedBox(height: 10),
-            
-            // Kolom Search diletakkan di sini agar secara konteks sinkron dengan penyaringan data di bawahnya
+            const SizedBox(height: 6),
             _buildSearchBar(context),
             const SizedBox(height: 16),
 
@@ -496,16 +518,8 @@ class _HomePageState extends State<HomePage> {
                 width: double.infinity,
                 padding: const EdgeInsets.symmetric(vertical: 24, horizontal: 16),
                 decoration: BoxDecoration(
-                  color: Colors.white,
+                  color: const Color(0xFF114223),
                   borderRadius: BorderRadius.circular(_globalRadius),
-                  border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withOpacity(0.04),
-                      blurRadius: 12,
-                      offset: const Offset(0, 4),
-                    ),
-                  ],
                 ),
                 child: Center(
                   child: Text(
@@ -513,9 +527,8 @@ class _HomePageState extends State<HomePage> {
                         ? 'Belum ada aktivitas terbaru'
                         : 'Tidak ada hasil pencarian untuk "$_searchQuery"',
                     style: const TextStyle(
-                      color: Colors.grey,
+                      color: Colors.white60,
                       fontSize: 13,
-                      fontFamily: 'Inter',
                     ),
                   ),
                 ),
@@ -599,12 +612,10 @@ class _HomePageState extends State<HomePage> {
   Future<void> _importFromGalleryDirect(BuildContext context) async {
     try {
       final provider = context.read<ScanProvider>();
-      
-      // Buka galeri pemilih gambar menggunakan wechat_assets_picker
       final assets = await AssetPicker.pickAssets(
         context,
         pickerConfig: const AssetPickerConfig(
-          maxAssets: 20, // Batas maksimum batch
+          maxAssets: 20,
           requestType: RequestType.image,
           gridCount: 3,
           pageSize: 90,
@@ -612,7 +623,6 @@ class _HomePageState extends State<HomePage> {
       );
 
       if (assets != null && assets.isNotEmpty) {
-        // Tampilkan loading dialog agar user tahu proses ekstraksi sedang berjalan
         if (!context.mounted) return;
         showDialog(
           context: context,
@@ -625,14 +635,13 @@ class _HomePageState extends State<HomePage> {
                 child: Column(
                   mainAxisSize: MainAxisSize.min,
                   children: [
-                    CircularProgressIndicator(color: _uinGreen),
+                    CircularProgressIndicator(color: Color(0xFF0C3A1D)),
                     SizedBox(height: 16),
                     Text(
                       'Mengekstrak teks skripsi...',
                       style: TextStyle(
-                        fontFamily: 'Inter',
                         fontWeight: FontWeight.bold,
-                        color: _uinGreen,
+                        color: Color(0xFF0C3A1D),
                       ),
                     ),
                   ],
@@ -663,14 +672,12 @@ class _HomePageState extends State<HomePage> {
           return;
         }
 
-        // Lakukan pemrosesan OCR
         await provider.scanImages(paths);
 
         if (!context.mounted) return;
-        Navigator.pop(context); // Tutup loading dialog
+        Navigator.pop(context);
 
         if (paths.length == 1) {
-          // Jika hanya 1 gambar, langsung arahkan ke halaman Edit
           final newlyScannedItem = provider.items.last;
           Navigator.push(
             context,
@@ -682,7 +689,6 @@ class _HomePageState extends State<HomePage> {
             ),
           );
         } else {
-          // Jika banyak gambar, arahkan ke Tab Review
           final shellState = context.findAncestorStateOfType<DashboardShellState>();
           if (shellState != null) {
             shellState.setTabIndex(1);
@@ -821,7 +827,7 @@ class _HomePageState extends State<HomePage> {
                           Expanded(
                             child: Text(
                               provider.errorMessage!,
-                              style: const TextStyle(color: Color(0xFFBA1A1A), fontSize: 13, fontFamily: 'Inter'),
+                              style: const TextStyle(color: Color(0xFFBA1A1A), fontSize: 13),
                             ),
                           ),
                         ],
@@ -835,13 +841,13 @@ class _HomePageState extends State<HomePage> {
                           ? null 
                           : () => _sendToSheets(context, provider, selectedSuccessItems),
                       style: ElevatedButton.styleFrom(
-                        backgroundColor: _uinGreen,
+                        backgroundColor: const Color(0xFF0C3A1D),
                         foregroundColor: Colors.white,
-                        disabledBackgroundColor: _uinGreen.withOpacity(0.8),
+                        disabledBackgroundColor: const Color(0xFF0C3A1D).withOpacity(0.8),
                         disabledForegroundColor: Colors.white,
                         shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(12)),
                         elevation: 4,
-                        shadowColor: _uinGreen.withOpacity(0.3),
+                        shadowColor: const Color(0xFF0C3A1D).withOpacity(0.3),
                       ),
                       icon: isSending
                           ? const SizedBox(
@@ -855,7 +861,7 @@ class _HomePageState extends State<HomePage> {
                           : const Icon(Icons.cloud_upload_rounded),
                       label: Text(
                         isSending ? 'Mengirim ke Google Sheets…' : 'Kirim ${selectedSuccessItems.length} Data ke Sheets',
-                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                        style: const TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -873,7 +879,7 @@ class _HomePageState extends State<HomePage> {
                       icon: const Icon(Icons.delete_sweep_rounded, size: 20),
                       label: const Text(
                         'Hapus Terpilih',
-                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold, fontFamily: 'Inter'),
+                        style: TextStyle(fontSize: 14, fontWeight: FontWeight.bold),
                       ),
                     ),
                   ),
@@ -898,7 +904,7 @@ class _HomePageState extends State<HomePage> {
           const Expanded(
             child: Text(
               'Data berhasil dikirim ke Google Sheets!',
-              style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0E9F6E), fontFamily: 'Inter'),
+              style: TextStyle(fontWeight: FontWeight.w600, color: Color(0xFF0E9F6E)),
             ),
           ),
           TextButton(
@@ -909,7 +915,7 @@ class _HomePageState extends State<HomePage> {
                 _selectedItemIds.clear();
               });
             },
-            child: const Text('Selesai', style: TextStyle(fontFamily: 'Inter', fontWeight: FontWeight.bold, color: _uinGreen)),
+            child: const Text('Selesai', style: TextStyle(fontWeight: FontWeight.bold, color: Color(0xFF0C3A1D))),
           ),
         ],
       ),
@@ -929,102 +935,4 @@ class _HomePageState extends State<HomePage> {
       );
     }
   }
-}
-
-class _StatCard extends StatelessWidget {
-  final String label;
-  final String value;
-  final IconData icon;
-  final Color iconBgColor;
-  final Color iconColor;
-  final Color valueColor;
-  final double globalRadius; // Poin 2
-
-  const _StatCard({
-    required this.label,
-    required this.value,
-    required this.icon,
-    required this.iconBgColor,
-    required this.iconColor,
-    required this.valueColor,
-    required this.globalRadius,
-  });
-
-  @override
-  Widget build(BuildContext context) {
-    return Expanded(
-      child: Container(
-        // Poin 4: Padding atas/bawah simetris 16px untuk memastikan angka tepat di tengah vertikal
-        padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
-        decoration: BoxDecoration(
-          color: Colors.white,
-          borderRadius: BorderRadius.circular(globalRadius), // Poin 2: Radius sinkron 16.0
-          border: Border.all(color: const Color(0xFFBEC9C2).withOpacity(0.3)),
-          boxShadow: [
-            BoxShadow(
-              color: Colors.black.withOpacity(0.04),
-              blurRadius: 12,
-              offset: const Offset(0, 4),
-            ),
-          ],
-        ),
-        child: Column(
-          mainAxisAlignment: MainAxisAlignment.center, // Poin 4: Distribusi center secara vertikal
-          crossAxisAlignment: CrossAxisAlignment.center,
-          children: [
-            Container(
-              width: 40,
-              height: 40,
-              decoration: BoxDecoration(
-                color: iconBgColor,
-                shape: BoxShape.circle,
-              ),
-              child: Icon(icon, color: iconColor, size: 20),
-            ),
-            const SizedBox(height: 10),
-            Text(
-              label,
-              textAlign: TextAlign.center,
-              style: const TextStyle(
-                fontSize: 10,
-                fontWeight: FontWeight.bold,
-                color: Color(0xFF6F7973),
-                letterSpacing: 0.5,
-                fontFamily: 'Inter',
-              ),
-            ),
-            const SizedBox(height: 6),
-            Text(
-              value,
-              style: TextStyle(
-                fontSize: 20, // Sedikit ditingkatkan nilainya agar lebih pop-out
-                fontWeight: FontWeight.bold,
-                color: valueColor,
-                fontFamily: 'Inter',
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-}
-
-class _DotGridPainter extends CustomPainter {
-  @override
-  void paint(Canvas canvas, Size size) {
-    final paint = Paint()
-      ..color = const Color(0xFFC0C9BF).withOpacity(0.12)
-      ..style = PaintingStyle.fill;
-      
-    const double spacing = 24.0;
-    for (double x = spacing / 2; x < size.width; x += spacing) {
-      for (double y = spacing / 2; y < size.height; y += spacing) {
-        canvas.drawCircle(Offset(x, y), 0.75, paint);
-      }
-    }
-  }
-
-  @override
-  bool shouldRepaint(covariant CustomPainter oldDelegate) => false;
 }

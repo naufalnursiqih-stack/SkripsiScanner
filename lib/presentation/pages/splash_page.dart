@@ -20,28 +20,24 @@ class _SplashPageState extends State<SplashPage> {
   }
 
   void startPerfectTimeline() {
-    // FASE 1 -> FASE 2: Logo pop-up membesar & Lingkaran membesar
     Timer(const Duration(milliseconds: 600), () {
       if (!mounted) return;
       setState(() {
         animationPhase = 2;
       });
 
-      // FASE 2 -> FASE 3: Mulai mengecil dan menggeser/membuka teks
       Timer(const Duration(milliseconds: 400), () {
         if (!mounted) return;
         setState(() {
           animationPhase = 3;
         });
 
-        // FASE 3 -> FASE 4: Selesai stabil di tengah
         Timer(const Duration(milliseconds: 500), () {
           if (!mounted) return;
           setState(() {
             animationPhase = 4;
           });
 
-          // Setelah stabil di fase 4 selama 1.5 detik, navigasi ke OnboardingPage
           Timer(const Duration(milliseconds: 1500), () {
             _navigateToHome();
           });
@@ -65,32 +61,19 @@ class _SplashPageState extends State<SplashPage> {
 
   @override
   Widget build(BuildContext context) {
-    // Mengambil dimensi layar terbesar secara dinamis
     double screenMaxDimension = MediaQuery.of(context).size.longestSide;
     
-    // ==========================================
-    // 1. ATRIBUT BACKGROUND RESPONSIF FULLSCREEN
-    // ==========================================
     double circleSize = animationPhase == 1 ? 16 : screenMaxDimension * 3;
-    
-    // Transisi bentuk dari lingkaran (radius besar) menjadi kotak sempurna (radius 0)
     BorderRadiusGeometry animatedRadius = animationPhase == 1 
         ? BorderRadius.circular(1000) 
         : BorderRadius.circular(0);
 
-    // Mengubah warna dasar Scaffold secara sinkron agar sudut layar tidak putih
     Color scaffoldBgColor = animationPhase == 1 ? Colors.white : const Color(0xFF1E5E3A);
 
-    // ==========================================
-    // 2. DIMENSI UKURAN LOGO
-    // ==========================================
+    // Ukuran akhir logo (fase 3 & 4) adalah 43
     double logoWidth = animationPhase == 1 ? 16 : (animationPhase == 2 ? 85 : 43);
     double logoHeight = animationPhase == 1 ? 18 : (animationPhase == 2 ? 96 : 48);
 
-    // ==========================================
-    // 3. LOGIKA REVEAL TEKS
-    // ==========================================
-    double gapWidth = (animationPhase == 3 || animationPhase == 4) ? 14.0 : 0.0;
     double textMaskWidth = (animationPhase == 3 || animationPhase == 4) ? 180.0 : 0.0;
     double textOpacity = animationPhase == 1 || animationPhase == 2 
         ? 0.0 
@@ -104,26 +87,28 @@ class _SplashPageState extends State<SplashPage> {
           alignment: Alignment.center,
           children: [
             
-            // BACKGROUND UTAMA (Mencair dari lingkaran jadi kotak penuh)
-            AnimatedContainer(
-              duration: const Duration(milliseconds: 600),
-              curve: Curves.easeInOut,
-              width: circleSize,
-              height: circleSize,
-              decoration: BoxDecoration(
-                color: const Color(0xFF1E5E3A),
-                borderRadius: animatedRadius,
+            // BACKGROUND UTAMA
+            Center(
+              child: AnimatedContainer(
+                duration: const Duration(milliseconds: 600),
+                curve: Curves.easeInOut,
+                width: circleSize,
+                height: circleSize,
+                decoration: BoxDecoration(
+                  color: const Color(0xFF1E5E3A),
+                  borderRadius: animatedRadius,
+                ),
               ),
             ),
 
-            // MEKANISME UTAMA: Konten Logo dan Teks di Tengah Layar
+            // MEKANISME KONTEN (Logo & Teks sejajar berdampingan menggunakan Row)
             Center(
               child: Row(
                 mainAxisSize: MainAxisSize.min,
                 crossAxisAlignment: CrossAxisAlignment.center,
                 children: [
                   
-                  // WIDGET LOGO
+                  // 1. WIDGET LOGO
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
@@ -144,14 +129,14 @@ class _SplashPageState extends State<SplashPage> {
                     ),
                   ),
 
-                  // GAP ANTARA LOGO DAN TEKS
+                  // Spasi antara logo dan teks yang membesar secara mulus
                   AnimatedContainer(
-                    duration: const Duration(milliseconds: 400),
+                    duration: const Duration(milliseconds: 500),
                     curve: Curves.easeInOut,
-                    width: gapWidth,
+                    width: (animationPhase == 3 || animationPhase == 4) ? 14.0 : 0.0,
                   ),
 
-                  // TEKS MUNCUL DI SEBELAH KANAN LOGO
+                  // 2. WIDGET TEKS
                   AnimatedContainer(
                     duration: const Duration(milliseconds: 500),
                     curve: Curves.easeInOut,

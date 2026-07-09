@@ -3,6 +3,7 @@
 import 'package:flutter/material.dart';
 import '../../data/services/storage_service.dart';
 
+
 class SettingsPage extends StatefulWidget {
   const SettingsPage({super.key});
 
@@ -286,17 +287,17 @@ class _SettingsPageState extends State<SettingsPage> {
             ),
           ),
           const Divider(height: 24),
-          _buildTeamMember(name: 'Naufal Nurfiqih', role: 'Developer Utama / PPB'),
+          _buildTeamMember(name: 'A. Naufal Nurfiqih Al-Farezy'),
           const SizedBox(height: 10),
-          _buildTeamMember(name: 'Anggota Kelompok 2', role: 'Desain UI / Dokumentasi'),
+          _buildTeamMember(name: 'Arjuna Dwi Putra'),
           const SizedBox(height: 10),
-          _buildTeamMember(name: 'Anggota Kelompok 3', role: 'Penguji Aplikasi / QA'),
+          _buildTeamMember(name: 'Ririn Dwi Cahyani Asmiruddin'),
         ],
       ),
     );
   }
 
-  Widget _buildTeamMember({required String name, required String role}) {
+  Widget _buildTeamMember({required String name}) {
     return Row(
       children: [
         CircleAvatar(
@@ -318,13 +319,6 @@ class _SettingsPageState extends State<SettingsPage> {
                 fontSize: 14,
                 fontWeight: FontWeight.w600,
                 color: Color(0xFF111827),
-              ),
-            ),
-            Text(
-              role,
-              style: TextStyle(
-                fontSize: 12,
-                color: Colors.grey.shade500,
               ),
             ),
           ],

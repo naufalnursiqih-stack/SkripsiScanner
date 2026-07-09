@@ -1,12 +1,14 @@
 // lib/presentation/pages/review_page.dart
 
 import 'package:flutter/material.dart';
+import 'package:google_fonts/google_fonts.dart';
 import 'package:provider/provider.dart';
 import '../../data/models/thesis_model.dart';
 import '../providers/scan_provider.dart';
 import '../widgets/thesis_card.dart';
 import 'edit_page.dart';
 import 'dashboard_shell.dart';
+import 'scanner_page.dart';
 
 class ReviewPage extends StatefulWidget {
   const ReviewPage({super.key});
@@ -47,6 +49,16 @@ class _ReviewPageState extends State<ReviewPage>
              item.nim.toLowerCase().contains(query) ||
              item.major.toLowerCase().contains(query);
     }).toList();
+  }
+
+  // Fungsi navigasi/aksi untuk memicu scan foto baru
+  void _addNewScan(BuildContext context, ScanProvider provider) {
+    Navigator.push(
+      context,
+      MaterialPageRoute(
+        builder: (_) => const ScannerPage(fromCamera: true),
+      ),
+    );
   }
 
   @override
@@ -91,7 +103,6 @@ class _ReviewPageState extends State<ReviewPage>
                   color: Colors.white,
                   fontWeight: FontWeight.bold,
                   fontSize: 18,
-                  fontFamily: 'Inter',
                 ),
               ),
               actions: [
@@ -111,7 +122,6 @@ class _ReviewPageState extends State<ReviewPage>
                     style: const TextStyle(
                       color: Color(0xFFFCBF48), // Gold for primary actions
                       fontWeight: FontWeight.bold,
-                      fontFamily: 'Inter',
                     ),
                   ),
                 ),
@@ -162,26 +172,28 @@ class _ReviewPageState extends State<ReviewPage>
                   ? Padding(
                       padding: const EdgeInsets.only(right: 12),
                       child: Container(
-                        height: 40,
+                        height: 44,
                         clipBehavior: Clip.antiAlias,
                         decoration: BoxDecoration(
-                          color: Colors.white,
-                          borderRadius: BorderRadius.circular(8),
+                          color: const Color(0xFF114223),
+                          borderRadius: BorderRadius.circular(24),
+                          border: Border.all(
+                            color: const Color(0xFFBEC9C2).withOpacity(0.1),
+                            width: 1.0,
+                          ),
                         ),
                         child: TextField(
                           controller: _searchController,
                           autofocus: true,
                           style: const TextStyle(
-                            color: Color(0xFF191C1E),
+                            color: Colors.white,
                             fontSize: 14,
-                            fontFamily: 'Inter',
                           ),
                           decoration: InputDecoration(
                             hintText: 'Cari hasil scan...',
                             hintStyle: const TextStyle(
-                              color: Color(0xFF6F7973),
+                              color: Colors.white60,
                               fontSize: 14,
-                              fontFamily: 'Inter',
                             ),
                             border: InputBorder.none,
                             focusedBorder: InputBorder.none,
@@ -191,12 +203,11 @@ class _ReviewPageState extends State<ReviewPage>
                             fillColor: Colors.transparent,
                             prefixIcon: const Icon(
                               Icons.search_rounded,
-                              color: Color(0xFF6F7973),
-                              size: 20,
+                              color: Colors.white60,
                             ),
                             suffixIcon: _searchQuery.isNotEmpty
                                 ? IconButton(
-                                    icon: const Icon(Icons.clear_rounded, color: Color(0xFF6F7973), size: 20),
+                                    icon: const Icon(Icons.clear_rounded, color: Colors.white60),
                                     onPressed: () {
                                       _searchController.clear();
                                       setState(() {
@@ -205,7 +216,7 @@ class _ReviewPageState extends State<ReviewPage>
                                     },
                                   )
                                 : null,
-                            contentPadding: const EdgeInsets.symmetric(vertical: 8),
+                            contentPadding: const EdgeInsets.symmetric(vertical: 10, horizontal: 16),
                           ),
                           onChanged: (value) {
                             setState(() {
@@ -215,13 +226,13 @@ class _ReviewPageState extends State<ReviewPage>
                         ),
                       ),
                     )
-                  : const Text(
+                  : Text(
                       'Review & Kirim',
                       style: TextStyle(
                         color: Colors.white,
                         fontWeight: FontWeight.bold,
                         fontSize: 20,
-                        fontFamily: 'Inter',
+                        fontFamily: GoogleFonts.poppins().fontFamily,
                       ),
                     ),
               actions: [
@@ -239,8 +250,13 @@ class _ReviewPageState extends State<ReviewPage>
                 controller: _tabController,
                 labelColor: Colors.white,
                 unselectedLabelColor: Colors.white.withOpacity(0.6),
-                labelStyle: const TextStyle(fontWeight: FontWeight.bold, fontFamily: 'Inter'),
-                unselectedLabelStyle: const TextStyle(fontFamily: 'Inter'),
+                labelStyle: TextStyle(
+                  fontWeight: FontWeight.bold,
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
+                unselectedLabelStyle: TextStyle(
+                  fontFamily: GoogleFonts.poppins().fontFamily,
+                ),
                 indicatorColor: const Color(0xFFFCBF48), // Gold indicator!
                 indicatorWeight: 3.0,
                 indicatorSize: TabBarIndicatorSize.tab,
@@ -269,6 +285,18 @@ class _ReviewPageState extends State<ReviewPage>
             _buildSendBar(context, provider),
         ],
       ),
+      // Tambahkan FloatingActionButton di bawah ini
+      // Menggunakan FloatingActionButton standar (Hanya Logo Kamera)
+      floatingActionButton: !_isSelectionMode
+          ? FloatingActionButton(
+              onPressed: () => _addNewScan(context, provider),
+              backgroundColor: const Color(0xFFFCBF48), // Warna emas UIN
+              foregroundColor: const Color(0xFF133C25), // Icon hijau tua
+              elevation: 4,
+              shape: const CircleBorder(), // Membuat tombol bulat sempurna
+              child: const Icon(Icons.add_a_photo_rounded, size: 24),
+            )
+          : null,
     );
   }
 
@@ -287,7 +315,6 @@ class _ReviewPageState extends State<ReviewPage>
                 style: const TextStyle(
                   fontSize: 13,
                   fontWeight: FontWeight.w600,
-                  fontFamily: 'Inter',
                   color: Colors.white,
                 ),
               ),
@@ -296,7 +323,6 @@ class _ReviewPageState extends State<ReviewPage>
                 style: const TextStyle(
                   fontSize: 13,
                   color: Color(0xFFFCBF48), // Gold for progress percentage
-                  fontFamily: 'Inter',
                   fontWeight: FontWeight.bold,
                 ),
               ),
@@ -330,7 +356,6 @@ class _ReviewPageState extends State<ReviewPage>
               'Tidak ada data',
               style: TextStyle(
                 color: Colors.white.withOpacity(0.7),
-                fontFamily: 'Inter',
               ),
             ),
           ],
@@ -369,7 +394,6 @@ class _ReviewPageState extends State<ReviewPage>
                 const Text(
                   'Hanya ada 1 item',
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontWeight: FontWeight.bold,
                     fontSize: 13,
                     color: Colors.white,
@@ -380,7 +404,6 @@ class _ReviewPageState extends State<ReviewPage>
                   'Gunakan fitur scan untuk menambah data baru',
                   textAlign: TextAlign.center,
                   style: TextStyle(
-                    fontFamily: 'Inter',
                     fontSize: 11,
                     color: Colors.white.withOpacity(0.7),
                   ),
@@ -505,7 +528,6 @@ class _ReviewPageState extends State<ReviewPage>
                               style: const TextStyle(
                                 color: Color(0xFFFFDAD6),
                                 fontSize: 13,
-                                fontFamily: 'Inter',
                               ),
                             ),
                           ),
@@ -548,7 +570,6 @@ class _ReviewPageState extends State<ReviewPage>
                         style: const TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
                         ),
                       ),
                     ),
@@ -573,7 +594,6 @@ class _ReviewPageState extends State<ReviewPage>
                         style: TextStyle(
                           fontSize: 14,
                           fontWeight: FontWeight.bold,
-                          fontFamily: 'Inter',
                         ),
                       ),
                     ),
@@ -606,7 +626,6 @@ class _ReviewPageState extends State<ReviewPage>
               style: TextStyle(
                 fontWeight: FontWeight.w600,
                 color: Colors.white,
-                fontFamily: 'Inter',
               ),
             ),
           ),
@@ -622,7 +641,6 @@ class _ReviewPageState extends State<ReviewPage>
             child: const Text(
               'Selesai',
               style: TextStyle(
-                fontFamily: 'Inter', 
                 fontWeight: FontWeight.bold,
                 color: Color(0xFFFCBF48),
               ),
